@@ -1,4 +1,4 @@
-import { Button } from '@renderer/components/ui/button'
+import { Button } from '@renderer/components/ui/button';
 
 function App(): React.JSX.Element {
   return (
@@ -10,7 +10,7 @@ function App(): React.JSX.Element {
         <Button variant="outline">Restore</Button>
       </div>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
