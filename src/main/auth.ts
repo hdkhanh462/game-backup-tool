@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { shell } from 'electron';
 import { OAuth2Client } from 'google-auth-library';
 import http from 'http';
@@ -41,11 +42,9 @@ async function fetchEmail(activeClient: OAuth2Client): Promise<string | null> {
   try {
     const { token } = await activeClient.getAccessToken();
     if (!token) return null;
-    const res = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+    const { data } = await axios.get<{ email?: string }>('https://www.googleapis.com/oauth2/v2/userinfo', {
       headers: { Authorization: `Bearer ${token}` },
     });
-    if (!res.ok) return null;
-    const data = (await res.json()) as { email?: string };
     return data.email ?? null;
   } catch {
     return null;

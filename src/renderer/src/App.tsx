@@ -1,44 +1,16 @@
 import { AddEditGameDialog } from '@renderer/components/AddEditGameDialog';
+import { DriveFolderPickerDialog } from '@renderer/components/DriveFolderPickerDialog';
 import { GameCard } from '@renderer/components/GameCard';
 import { GoogleAccountBar } from '@renderer/components/GoogleAccountBar';
 import { Button } from '@renderer/components/ui/button';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@renderer/components/ui/empty';
-import { toast } from '@renderer/components/ui/toast';
-import { AuthProvider } from '@renderer/hooks/useAuthStatus';
 import { useGames } from '@renderer/hooks/useGames';
-import type { Game, GameInput } from '@shared/types';
+import { useDialogStore } from '@renderer/store/useDialogStore';
 import { PlusIcon } from 'lucide-react';
-import { useState } from 'react';
 
-function Dashboard(): React.JSX.Element {
-  const { games, addGame, updateGame, removeGame } = useGames();
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingGame, setEditingGame] = useState<Game | null>(null);
-
-  const openAddDialog = (): void => {
-    setEditingGame(null);
-    setDialogOpen(true);
-  };
-
-  const openEditDialog = (game: Game): void => {
-    setEditingGame(game);
-    setDialogOpen(true);
-  };
-
-  const handleSubmit = async (input: GameInput): Promise<void> => {
-    if (editingGame) {
-      await updateGame(editingGame.id, input);
-      toast.add({ title: `${input.name} updated`, type: 'success' });
-    } else {
-      await addGame(input);
-      toast.add({ title: `${input.name} added`, type: 'success' });
-    }
-  };
-
-  const handleRemove = async (game: Game): Promise<void> => {
-    await removeGame(game.id);
-    toast.add({ title: `${game.name} removed`, type: 'info' });
-  };
+function App(): React.JSX.Element {
+  const { games } = useGames();
+  const openAddGameDialog = useDialogStore((state) => state.openAddGameDialog);
 
   return (
     <div className="mx-auto flex min-h-screen max-w-3xl flex-col gap-6 p-6">
@@ -57,7 +29,7 @@ function Dashboard(): React.JSX.Element {
             <EmptyDescription>Add a game to start managing its save backups.</EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            <Button onClick={openAddDialog}>
+            <Button onClick={() => openAddGameDialog()}>
               <PlusIcon data-icon="inline-start" />
               Add Game
             </Button>
@@ -67,26 +39,19 @@ function Dashboard(): React.JSX.Element {
         <>
           <div className="flex flex-col gap-4">
             {games.map((game) => (
-              <GameCard key={game.id} game={game} onEdit={openEditDialog} onRemove={handleRemove} />
+              <GameCard key={game.id} game={game} />
             ))}
           </div>
-          <Button className="self-start" onClick={openAddDialog}>
+          <Button className="self-start" onClick={() => openAddGameDialog()}>
             <PlusIcon data-icon="inline-start" />
             Add Game
           </Button>
         </>
       )}
 
-      <AddEditGameDialog open={dialogOpen} onOpenChange={setDialogOpen} game={editingGame} onSubmit={handleSubmit} />
+      <AddEditGameDialog />
+      <DriveFolderPickerDialog />
     </div>
-  );
-}
-
-function App(): React.JSX.Element {
-  return (
-    <AuthProvider>
-      <Dashboard />
-    </AuthProvider>
   );
 }
 

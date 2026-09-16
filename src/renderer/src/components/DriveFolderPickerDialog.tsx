@@ -4,7 +4,8 @@ import { Input } from '@renderer/components/ui/input';
 import { Spinner } from '@renderer/components/ui/spinner';
 import { toast } from '@renderer/components/ui/toast';
 import { api } from '@renderer/lib/api';
-import type { DriveFolder } from '@shared/types';
+import { useDialogStore } from '@renderer/store/useDialogStore';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChevronRightIcon, FolderIcon, FolderPlusIcon, HomeIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -13,50 +14,37 @@ interface Crumb {
   name: string;
 }
 
-interface DriveFolderPickerDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSelect: (folder: { id: string; path: string }) => void | Promise<void>;
-  startParentId?: string;
-  startPath?: string;
-}
+export function DriveFolderPickerDialog(): React.JSX.Element {
+  const request = useDialogStore((state) => state.driveFolderPicker);
+  const closeDriveFolderPicker = useDialogStore((state) => state.closeDriveFolderPicker);
+  const queryClient = useQueryClient();
 
-export function DriveFolderPickerDialog({ open, onOpenChange, onSelect, startParentId = 'root', startPath = 'My Drive' }: DriveFolderPickerDialogProps): React.JSX.Element {
+  const startParentId = request?.startParentId ?? 'root';
+  const startPath = request?.startPath ?? 'My Drive';
+
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([{ id: startParentId, name: startPath }]);
-  const [folders, setFolders] = useState<DriveFolder[]>([]);
-  const [loading, setLoading] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
   const [creating, setCreating] = useState(false);
 
+  const open = request !== null;
   const currentFolder = breadcrumbs[breadcrumbs.length - 1];
 
-  const loadFolders = async (parentId: string): Promise<void> => {
-    setLoading(true);
-    try {
-      const result = await api.drive.listFolders(parentId);
-      setFolders(result.folders);
-    } catch (error) {
-      toast.add({ title: 'Failed to load Drive folders', description: String(error), type: 'error' });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    if (!open) return;
-    setBreadcrumbs([{ id: startParentId, name: startPath }]);
-    void loadFolders(startParentId);
+    if (open) setBreadcrumbs([{ id: startParentId, name: startPath }]);
   }, [open, startParentId, startPath]);
 
-  const openFolder = (folder: DriveFolder): void => {
+  const { data: folders = [], isLoading } = useQuery({
+    queryKey: ['drive', 'folders', currentFolder.id],
+    queryFn: () => api.drive.listFolders(currentFolder.id).then((res) => res.folders),
+    enabled: open,
+  });
+
+  const openFolder = (folder: Crumb): void => {
     setBreadcrumbs((prev) => [...prev, folder]);
-    void loadFolders(folder.id);
   };
 
   const goToBreadcrumb = (index: number): void => {
-    const next = breadcrumbs.slice(0, index + 1);
-    setBreadcrumbs(next);
-    void loadFolders(next[next.length - 1].id);
+    setBreadcrumbs((prev) => prev.slice(0, index + 1));
   };
 
   const handleCreateFolder = async (): Promise<void> => {
@@ -65,7 +53,7 @@ export function DriveFolderPickerDialog({ open, onOpenChange, onSelect, startPar
     try {
       await api.drive.createFolder(newFolderName.trim(), currentFolder.id);
       setNewFolderName('');
-      await loadFolders(currentFolder.id);
+      await queryClient.invalidateQueries({ queryKey: ['drive', 'folders', currentFolder.id] });
     } catch (error) {
       toast.add({ title: 'Failed to create folder', description: String(error), type: 'error' });
     } finally {
@@ -74,12 +62,14 @@ export function DriveFolderPickerDialog({ open, onOpenChange, onSelect, startPar
   };
 
   const handleSelect = async (): Promise<void> => {
+    if (!request) return;
     const path = breadcrumbs.map((c) => c.name).join('/');
-    await onSelect({ id: currentFolder.id, path });
+    await request.onSelect({ id: currentFolder.id, path });
+    closeDriveFolderPicker();
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(next) => !next && closeDriveFolderPicker()}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Choose a Drive folder</DialogTitle>
@@ -98,7 +88,7 @@ export function DriveFolderPickerDialog({ open, onOpenChange, onSelect, startPar
         </div>
 
         <div className="flex max-h-64 flex-col gap-1 overflow-y-auto rounded-md border p-2">
-          {loading ? (
+          {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <Spinner />
             </div>
@@ -123,7 +113,7 @@ export function DriveFolderPickerDialog({ open, onOpenChange, onSelect, startPar
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => closeDriveFolderPicker()}>
             Cancel
           </Button>
           <Button onClick={handleSelect}>Select This Folder</Button>

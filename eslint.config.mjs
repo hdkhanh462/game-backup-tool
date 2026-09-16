@@ -30,12 +30,6 @@ export const config = [
     },
   },
   {
-    files: ['*.config.js', '.prettierrc.js'],
-    languageOptions: {
-      globals: { module: 'writable' },
-    },
-  },
-  {
     ignores: ['dist/**', 'coverage/**', 'out/**', 'node_modules/**', '.agents/**', '.claude/**'],
   },
 ];

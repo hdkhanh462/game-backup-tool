@@ -1,15 +1,16 @@
 import { Badge } from '@renderer/components/ui/badge';
 import { Button } from '@renderer/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@renderer/components/ui/card';
+import { toast } from '@renderer/components/ui/toast';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui/tooltip';
+import { useGames } from '@renderer/hooks/useGames';
 import { api } from '@renderer/lib/api';
+import { useDialogStore } from '@renderer/store/useDialogStore';
 import type { Game } from '@shared/types';
 import { FolderOpenIcon, HistoryIcon, PencilIcon, TrashIcon, UploadIcon } from 'lucide-react';
 
 interface GameCardProps {
   game: Game;
-  onEdit: (game: Game) => void;
-  onRemove: (game: Game) => void;
 }
 
 function statusBadge(game: Game): React.JSX.Element {
@@ -22,7 +23,15 @@ function statusBadge(game: Game): React.JSX.Element {
   return <Badge variant="outline">Never backed up</Badge>;
 }
 
-export function GameCard({ game, onEdit, onRemove }: GameCardProps): React.JSX.Element {
+export function GameCard({ game }: GameCardProps): React.JSX.Element {
+  const { removeGame } = useGames();
+  const openEditGameDialog = useDialogStore((state) => state.openEditGameDialog);
+
+  const handleRemove = async (): Promise<void> => {
+    await removeGame(game.id);
+    toast.add({ title: `${game.name} removed`, type: 'info' });
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -64,11 +73,11 @@ export function GameCard({ game, onEdit, onRemove }: GameCardProps): React.JSX.E
           <FolderOpenIcon data-icon="inline-start" />
           Open Save Folder
         </Button>
-        <Button size="sm" variant="ghost" onClick={() => onEdit(game)}>
+        <Button size="sm" variant="ghost" onClick={() => openEditGameDialog(game)}>
           <PencilIcon data-icon="inline-start" />
           Edit
         </Button>
-        <Button size="sm" variant="ghost" onClick={() => onRemove(game)}>
+        <Button size="sm" variant="ghost" onClick={handleRemove}>
           <TrashIcon data-icon="inline-start" />
           Remove
         </Button>

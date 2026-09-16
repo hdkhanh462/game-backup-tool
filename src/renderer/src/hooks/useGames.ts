@@ -1,50 +1,49 @@
 import { api } from '@renderer/lib/api';
 import type { Game, GameInput } from '@shared/types';
-import { useCallback, useEffect, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-interface UseGamesResult {
+const GAMES_KEY = ['games'] as const;
+
+export function useGames(): {
   games: Game[];
-  loading: boolean;
+  isLoading: boolean;
   addGame: (input: GameInput) => Promise<Game>;
   updateGame: (id: string, patch: Partial<GameInput>) => Promise<Game>;
   removeGame: (id: string) => Promise<void>;
-  refresh: () => Promise<void>;
-}
+} {
+  const queryClient = useQueryClient();
 
-export function useGames(): UseGamesResult {
-  const [games, setGames] = useState<Game[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: games = [], isLoading } = useQuery({
+    queryKey: GAMES_KEY,
+    queryFn: () => api.games.list(),
+  });
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
-    try {
-      const list = await api.games.list();
-      setGames(list);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const addMutation = useMutation({
+    mutationFn: (input: GameInput) => api.games.add(input),
+    onSuccess: (game) => {
+      queryClient.setQueryData<Game[]>(GAMES_KEY, (prev) => [...(prev ?? []), game]);
+    },
+  });
 
-  useEffect(() => {
-    void refresh();
-  }, [refresh]);
+  const updateMutation = useMutation({
+    mutationFn: ({ id, patch }: { id: string; patch: Partial<GameInput> }) => api.games.update(id, patch),
+    onSuccess: (updated) => {
+      queryClient.setQueryData<Game[]>(GAMES_KEY, (prev) => (prev ?? []).map((g) => (g.id === updated.id ? updated : g)));
+    },
+  });
 
-  const addGame = useCallback(async (input: GameInput) => {
-    const game = await api.games.add(input);
-    setGames((prev) => [...prev, game]);
-    return game;
-  }, []);
+  const removeMutation = useMutation({
+    mutationFn: (id: string) => api.games.remove(id),
+    onSuccess: (_data, id) => {
+      queryClient.setQueryData<Game[]>(GAMES_KEY, (prev) => (prev ?? []).filter((g) => g.id !== id));
+    },
+  });
 
-  const updateGame = useCallback(async (id: string, patch: Partial<GameInput>) => {
-    const updated = await api.games.update(id, patch);
-    setGames((prev) => prev.map((g) => (g.id === id ? updated : g)));
-    return updated;
-  }, []);
-
-  const removeGame = useCallback(async (id: string) => {
-    await api.games.remove(id);
-    setGames((prev) => prev.filter((g) => g.id !== id));
-  }, []);
-
-  return { games, loading, addGame, updateGame, removeGame, refresh };
+  return {
+    games,
+    isLoading,
+    addGame: (input) => addMutation.mutateAsync(input),
+    updateGame: (id, patch) => updateMutation.mutateAsync({ id, patch }),
+    removeGame: (id) => removeMutation.mutateAsync(id),
+  };
 }
