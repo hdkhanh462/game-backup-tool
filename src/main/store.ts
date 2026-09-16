@@ -14,6 +14,8 @@ export function getStore(): Promise<StoreType<StoreSchema>> {
           games: [],
           auth: {
             email: null,
+            name: null,
+            picture: null,
             rootFolderId: null,
             rootFolderPath: null,
             connectedAt: null,

@@ -14,7 +14,7 @@ import { useOperationStore } from '@renderer/features/backup/operationStore';
 import { useGames } from '@renderer/features/games/hooks/useGames';
 import { useTheme } from '@renderer/features/settings/hooks/useTheme';
 import { useDialogStore } from '@renderer/store/useDialogStore';
-import { CloudDownloadIcon, PlusIcon, SettingsIcon } from 'lucide-react';
+import { CloudDownloadIcon, PlusIcon } from 'lucide-react';
 import { useEffect } from 'react';
 
 function App(): React.JSX.Element {
@@ -22,7 +22,6 @@ function App(): React.JSX.Element {
   const { games } = useGames();
   const { status } = useAuthStatus();
   const openAddGameDialog = useDialogStore((state) => state.openAddGameDialog);
-  const openSettingsDialog = useDialogStore((state) => state.openSettingsDialog);
   const openImportGamesDialog = useDialogStore((state) => state.openImportGamesDialog);
   const setOperation = useOperationStore((state) => state.setOperation);
 
@@ -35,20 +34,17 @@ function App(): React.JSX.Element {
   }, [setOperation]);
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-3xl flex-col gap-6 p-6">
+    <div className="mx-auto flex min-h-screen max-w-7xl flex-col gap-6 p-6">
       <header className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">GameSave Backup</h1>
         <div className="flex items-center gap-2">
-          <GoogleAccountBar />
           {status.state === 'connected' && (
             <Button variant="outline" onClick={() => openImportGamesDialog()}>
               <CloudDownloadIcon data-icon="inline-start" />
               Import from Drive
             </Button>
           )}
-          <Button size="icon" variant="ghost" onClick={() => openSettingsDialog()}>
-            <SettingsIcon />
-          </Button>
+          <GoogleAccountBar />
         </div>
       </header>
 
@@ -78,7 +74,7 @@ function App(): React.JSX.Element {
         </Empty>
       ) : (
         <>
-          <div className="flex flex-col gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {games.map((game) => (
               <GameCard key={game.id} game={game} />
             ))}

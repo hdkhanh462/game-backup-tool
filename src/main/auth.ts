@@ -8,13 +8,15 @@ import type { AuthStatus } from '../shared/types';
 import { clearRefreshToken, loadRefreshToken, saveRefreshToken } from './secureToken';
 import { getStore } from './store';
 
-const SCOPES = ['https://www.googleapis.com/auth/drive.file', 'https://www.googleapis.com/auth/userinfo.email'];
+const SCOPES = ['https://www.googleapis.com/auth/drive.file', 'https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile'];
 const CONNECT_TIMEOUT_MS = 2 * 60 * 1000;
 
 let client: OAuth2Client | null = null;
 let currentState: AuthStatus = {
   state: 'disconnected',
   email: null,
+  name: null,
+  picture: null,
   rootFolderId: null,
   rootFolderPath: null,
 };
@@ -38,16 +40,22 @@ function createClient(redirectUri?: string): OAuth2Client {
   });
 }
 
-async function fetchEmail(activeClient: OAuth2Client): Promise<string | null> {
+interface GoogleProfile {
+  email: string | null;
+  name: string | null;
+  picture: string | null;
+}
+
+async function fetchProfile(activeClient: OAuth2Client): Promise<GoogleProfile> {
   try {
     const { token } = await activeClient.getAccessToken();
-    if (!token) return null;
-    const { data } = await axios.get<{ email?: string }>('https://www.googleapis.com/oauth2/v2/userinfo', {
+    if (!token) return { email: null, name: null, picture: null };
+    const { data } = await axios.get<{ email?: string; name?: string; picture?: string }>('https://www.googleapis.com/oauth2/v2/userinfo', {
       headers: { Authorization: `Bearer ${token}` },
     });
-    return data.email ?? null;
+    return { email: data.email ?? null, name: data.name ?? null, picture: data.picture ?? null };
   } catch {
-    return null;
+    return { email: null, name: null, picture: null };
   }
 }
 
@@ -70,6 +78,8 @@ export async function tryRestoreSession(): Promise<AuthStatus> {
     currentState = {
       state: 'error',
       email: null,
+      name: null,
+      picture: null,
       rootFolderId: null,
       rootFolderPath: null,
       error: 'Missing OAuth client credentials',
@@ -79,7 +89,7 @@ export async function tryRestoreSession(): Promise<AuthStatus> {
 
   const refreshToken = await loadRefreshToken();
   if (!refreshToken) {
-    currentState = { state: 'disconnected', email: null, rootFolderId: null, rootFolderPath: null };
+    currentState = { state: 'disconnected', email: null, name: null, picture: null, rootFolderId: null, rootFolderPath: null };
     return currentState;
   }
 
@@ -90,16 +100,21 @@ export async function tryRestoreSession(): Promise<AuthStatus> {
     client = activeClient;
 
     const store = await getStore();
-    const email = (await fetchEmail(activeClient)) ?? store.get('auth.email');
+    const profile = await fetchProfile(activeClient);
+    const email = profile.email ?? store.get('auth.email');
+    const name = profile.name ?? store.get('auth.name');
+    const picture = profile.picture ?? store.get('auth.picture');
     currentState = {
       state: 'connected',
       email,
+      name,
+      picture,
       rootFolderId: store.get('auth.rootFolderId'),
       rootFolderPath: store.get('auth.rootFolderPath'),
     };
   } catch {
     await clearRefreshToken();
-    currentState = { state: 'disconnected', email: null, rootFolderId: null, rootFolderPath: null };
+    currentState = { state: 'disconnected', email: null, name: null, picture: null, rootFolderId: null, rootFolderPath: null };
   }
 
   return currentState;
@@ -171,14 +186,18 @@ export async function connect(): Promise<AuthStatus> {
           await saveRefreshToken(tokens.refresh_token);
         }
 
-        const email = await fetchEmail(activeClient);
+        const profile = await fetchProfile(activeClient);
         const store = await getStore();
-        store.set('auth.email', email);
+        store.set('auth.email', profile.email);
+        store.set('auth.name', profile.name);
+        store.set('auth.picture', profile.picture);
         store.set('auth.connectedAt', new Date().toISOString());
 
         return {
           state: 'connected',
-          email,
+          email: profile.email,
+          name: profile.name,
+          picture: profile.picture,
           rootFolderId: store.get('auth.rootFolderId'),
           rootFolderPath: store.get('auth.rootFolderPath'),
         };
@@ -191,6 +210,8 @@ export async function connect(): Promise<AuthStatus> {
     currentState = {
       state: 'error',
       email: null,
+      name: null,
+      picture: null,
       rootFolderId: null,
       rootFolderPath: null,
       error: error instanceof Error ? error.message : 'Failed to connect to Google',
@@ -209,10 +230,12 @@ export async function disconnect(): Promise<void> {
   await clearRefreshToken();
   const store = await getStore();
   store.set('auth.email', null);
+  store.set('auth.name', null);
+  store.set('auth.picture', null);
   store.set('auth.rootFolderId', null);
   store.set('auth.rootFolderPath', null);
   store.set('auth.connectedAt', null);
-  currentState = { state: 'disconnected', email: null, rootFolderId: null, rootFolderPath: null };
+  currentState = { state: 'disconnected', email: null, name: null, picture: null, rootFolderId: null, rootFolderPath: null };
 }
 
 export async function setRootFolder(folder: { id: string; path: string }): Promise<AuthStatus> {

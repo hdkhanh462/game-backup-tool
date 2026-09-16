@@ -8,6 +8,9 @@ import { useDialogStore } from '@renderer/store/useDialogStore';
 import type { AppSettings } from '@shared/types';
 import { Controller, useForm } from 'react-hook-form';
 
+const THEME_LABELS: Record<string, string> = { light: 'Light', dark: 'Dark', system: 'System' };
+const LANGUAGE_LABELS: Record<string, string> = { en: 'English' };
+
 export function SettingsDialog(): React.JSX.Element {
   const open = useDialogStore((state) => state.settingsDialog.open);
   const closeSettingsDialog = useDialogStore((state) => state.closeSettingsDialog);
@@ -86,7 +89,7 @@ export function SettingsDialog(): React.JSX.Element {
                   <FieldContent>
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger>
-                        <SelectValue />
+                        <SelectValue>{(value: string) => THEME_LABELS[value] ?? value}</SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="light">Light</SelectItem>
@@ -107,7 +110,7 @@ export function SettingsDialog(): React.JSX.Element {
                   <FieldContent>
                     <Select value={field.value ?? 'en'} onValueChange={field.onChange}>
                       <SelectTrigger>
-                        <SelectValue />
+                        <SelectValue>{(value: string) => LANGUAGE_LABELS[value] ?? value}</SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="en">English</SelectItem>
