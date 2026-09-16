@@ -1,10 +1,13 @@
 import { Badge } from '@renderer/components/ui/badge';
 import { Button } from '@renderer/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@renderer/components/ui/card';
+import { Progress } from '@renderer/components/ui/progress';
 import { toast } from '@renderer/components/ui/toast';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui/tooltip';
+import { useBackup } from '@renderer/hooks/useBackup';
 import { useGames } from '@renderer/hooks/useGames';
+import { useSettings } from '@renderer/hooks/useSettings';
 import { api } from '@renderer/lib/api';
+import { formatBytes } from '@renderer/lib/format';
 import { useDialogStore } from '@renderer/store/useDialogStore';
 import type { GameCardProps } from '@renderer/types/game-card.type';
 import type { Game } from '@shared/types';
@@ -20,14 +23,55 @@ function statusBadge(game: Game): React.JSX.Element {
   return <Badge variant="outline">Never backed up</Badge>;
 }
 
+function phaseLabel(operationType: 'backup' | 'restore', phase: string): string {
+  if (phase === 'safetyBackup') return 'Backing up current save';
+  if (operationType === 'restore') return 'Restoring';
+  return 'Backing up';
+}
+
 export function GameCard({ game }: GameCardProps): React.JSX.Element {
   const { removeGame } = useGames();
+  const { settings } = useSettings();
   const openEditGameDialog = useDialogStore((state) => state.openEditGameDialog);
+  const openBackupHistoryDialog = useDialogStore((state) => state.openBackupHistoryDialog);
+  const openRestoreConfirmDialog = useDialogStore((state) => state.openRestoreConfirmDialog);
+  const { operation, isBusy, runBackup, restoreVersion } = useBackup(game.id);
+
+  const handleBackup = async (): Promise<void> => {
+    try {
+      await runBackup();
+      toast.add({ title: `${game.name} backed up`, type: 'success' });
+    } catch (error) {
+      toast.add({ title: 'Backup failed', description: String(error), type: 'error' });
+    }
+  };
+
+  const handleRestoreClick = async (): Promise<void> => {
+    const versions = await api.backup.listVersions(game.id);
+    if (versions.length === 0) {
+      toast.add({ title: 'No backups yet', type: 'info' });
+      return;
+    }
+    const latest = versions[0];
+    if (!settings.confirmBeforeOverwrite) {
+      try {
+        await restoreVersion(latest.id, { safetyBackup: settings.safetyBackupBeforeRestore, deleteExtraneous: true });
+        toast.add({ title: `${game.name} restored`, type: 'success' });
+      } catch (error) {
+        toast.add({ title: 'Restore failed', description: String(error), type: 'error' });
+      }
+      return;
+    }
+    openRestoreConfirmDialog(game, latest);
+  };
 
   const handleRemove = async (): Promise<void> => {
     await removeGame(game.id);
     toast.add({ title: `${game.name} removed`, type: 'info' });
   };
+
+  const progress = operation?.progress;
+  const progressPercent = progress && progress.bytesTotal > 0 ? Math.round((progress.bytesDone / progress.bytesTotal) * 100) : 0;
 
   return (
     <Card>
@@ -39,42 +83,36 @@ export function GameCard({ game }: GameCardProps): React.JSX.Element {
         <p className="truncate">Local: {game.localPath}</p>
         <p className="truncate">Drive: {game.driveFolderPath ?? 'Not set'}</p>
       </CardContent>
+      {isBusy && operation && (
+        <CardContent className="flex flex-col gap-1 pt-0">
+          <Progress value={progressPercent} />
+          <p className="text-xs text-muted-foreground">
+            {phaseLabel(operation.type, progress?.phase ?? '')}
+            {progress ? `… ${progress.filesDone}/${progress.filesTotal} files, ${formatBytes(progress.bytesDone)}/${formatBytes(progress.bytesTotal)}` : '…'}
+          </p>
+        </CardContent>
+      )}
       <CardFooter className="flex flex-wrap gap-2">
-        <Tooltip>
-          <TooltipTrigger render={<span tabIndex={0} />}>
-            <Button size="sm" disabled className="pointer-events-none">
-              <UploadIcon data-icon="inline-start" />
-              Backup
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Available in a future update</TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger render={<span tabIndex={0} />}>
-            <Button size="sm" variant="outline" disabled className="pointer-events-none">
-              Restore
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Available in a future update</TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger render={<span tabIndex={0} />}>
-            <Button size="sm" variant="outline" disabled className="pointer-events-none">
-              <HistoryIcon data-icon="inline-start" />
-              History
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Available in a future update</TooltipContent>
-        </Tooltip>
+        <Button size="sm" disabled={isBusy} onClick={handleBackup}>
+          <UploadIcon data-icon="inline-start" />
+          Backup
+        </Button>
+        <Button size="sm" variant="outline" disabled={isBusy || game.lastBackupStatus === 'never'} onClick={handleRestoreClick}>
+          Restore
+        </Button>
+        <Button size="sm" variant="outline" disabled={isBusy} onClick={() => openBackupHistoryDialog(game)}>
+          <HistoryIcon data-icon="inline-start" />
+          History
+        </Button>
         <Button size="sm" variant="ghost" onClick={() => api.system.openPath(game.localPath)}>
           <FolderOpenIcon data-icon="inline-start" />
           Open Save Folder
         </Button>
-        <Button size="sm" variant="ghost" onClick={() => openEditGameDialog(game)}>
+        <Button size="sm" variant="ghost" disabled={isBusy} onClick={() => openEditGameDialog(game)}>
           <PencilIcon data-icon="inline-start" />
           Edit
         </Button>
-        <Button size="sm" variant="ghost" onClick={handleRemove}>
+        <Button size="sm" variant="ghost" disabled={isBusy} onClick={handleRemove}>
           <TrashIcon data-icon="inline-start" />
           Remove
         </Button>

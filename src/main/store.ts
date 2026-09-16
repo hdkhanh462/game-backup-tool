@@ -19,6 +19,13 @@ export function getStore(): Promise<StoreType<StoreSchema>> {
             connectedAt: null,
             refreshTokenEnc: null,
           },
+          settings: {
+            incrementalBackupEnabled: true,
+            confirmBeforeOverwrite: true,
+            safetyBackupBeforeRestore: true,
+            theme: 'system',
+            language: 'en',
+          },
         },
       });
     });

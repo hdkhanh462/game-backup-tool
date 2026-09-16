@@ -1,4 +1,4 @@
-import type { Game } from '../../shared/types';
+import type { AppSettings, Game } from '../../shared/types';
 
 export interface StoreSchema {
   games: Game[];
@@ -9,4 +9,5 @@ export interface StoreSchema {
     connectedAt: string | null;
     refreshTokenEnc: string | null;
   };
+  settings: AppSettings;
 }

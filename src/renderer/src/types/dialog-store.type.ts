@@ -1,4 +1,4 @@
-import type { Game } from '@shared/types';
+import type { BackupVersion, Game } from '@shared/types';
 
 import type { DriveFolderPickerRequest } from './drive-folder-picker.type';
 
@@ -11,4 +11,16 @@ export interface DialogState {
   driveFolderPicker: DriveFolderPickerRequest | null;
   openDriveFolderPicker: (request: DriveFolderPickerRequest) => void;
   closeDriveFolderPicker: () => void;
+
+  backupHistoryDialog: { open: boolean; game: Game | null };
+  openBackupHistoryDialog: (game: Game) => void;
+  closeBackupHistoryDialog: () => void;
+
+  restoreConfirmDialog: { open: boolean; game: Game | null; version: BackupVersion | null };
+  openRestoreConfirmDialog: (game: Game, version: BackupVersion) => void;
+  closeRestoreConfirmDialog: () => void;
+
+  settingsDialog: { open: boolean };
+  openSettingsDialog: () => void;
+  closeSettingsDialog: () => void;
 }

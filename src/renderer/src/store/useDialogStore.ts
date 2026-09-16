@@ -10,4 +10,16 @@ export const useDialogStore = create<DialogState>((set) => ({
   driveFolderPicker: null,
   openDriveFolderPicker: (request) => set({ driveFolderPicker: request }),
   closeDriveFolderPicker: () => set({ driveFolderPicker: null }),
+
+  backupHistoryDialog: { open: false, game: null },
+  openBackupHistoryDialog: (game) => set({ backupHistoryDialog: { open: true, game } }),
+  closeBackupHistoryDialog: () => set((state) => ({ backupHistoryDialog: { ...state.backupHistoryDialog, open: false } })),
+
+  restoreConfirmDialog: { open: false, game: null, version: null },
+  openRestoreConfirmDialog: (game, version) => set({ restoreConfirmDialog: { open: true, game, version } }),
+  closeRestoreConfirmDialog: () => set((state) => ({ restoreConfirmDialog: { ...state.restoreConfirmDialog, open: false } })),
+
+  settingsDialog: { open: false },
+  openSettingsDialog: () => set({ settingsDialog: { open: true } }),
+  closeSettingsDialog: () => set({ settingsDialog: { open: false } }),
 }));
