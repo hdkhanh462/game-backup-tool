@@ -1,8 +1,16 @@
 import { electronApp, is, optimizer } from '@electron-toolkit/utils';
+import { config as loadDotenv } from 'dotenv';
 import { app, BrowserWindow, shell } from 'electron';
 import { join } from 'path';
 
 import icon from '../../resources/icon.png?asset';
+import { tryRestoreSession } from './auth';
+import { registerIpcHandlers } from './ipc';
+
+// electron-vite does not inject .env values into process.env for the main process
+// (its loadEnv only handles VITE_/MAIN_VITE_-prefixed build-time variables), so load
+// it here explicitly for runtime secrets like the Google OAuth client credentials.
+loadDotenv();
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
@@ -39,6 +47,9 @@ app.whenReady().then(() => {
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window);
   });
+
+  registerIpcHandlers();
+  void tryRestoreSession();
 
   createWindow();
 
