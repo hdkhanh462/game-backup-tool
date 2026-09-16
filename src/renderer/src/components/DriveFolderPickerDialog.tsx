@@ -5,14 +5,10 @@ import { Spinner } from '@renderer/components/ui/spinner';
 import { toast } from '@renderer/components/ui/toast';
 import { api } from '@renderer/lib/api';
 import { useDialogStore } from '@renderer/store/useDialogStore';
+import type { DriveFolderCrumb } from '@renderer/types/drive-folder-picker.type';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChevronRightIcon, FolderIcon, FolderPlusIcon, HomeIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
-
-interface Crumb {
-  id: string;
-  name: string;
-}
 
 export function DriveFolderPickerDialog(): React.JSX.Element {
   const request = useDialogStore((state) => state.driveFolderPicker);
@@ -22,7 +18,7 @@ export function DriveFolderPickerDialog(): React.JSX.Element {
   const startParentId = request?.startParentId ?? 'root';
   const startPath = request?.startPath ?? 'My Drive';
 
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([{ id: startParentId, name: startPath }]);
+  const [breadcrumbs, setBreadcrumbs] = useState<DriveFolderCrumb[]>([{ id: startParentId, name: startPath }]);
   const [newFolderName, setNewFolderName] = useState('');
   const [creating, setCreating] = useState(false);
 
@@ -39,7 +35,7 @@ export function DriveFolderPickerDialog(): React.JSX.Element {
     enabled: open,
   });
 
-  const openFolder = (folder: Crumb): void => {
+  const openFolder = (folder: DriveFolderCrumb): void => {
     setBreadcrumbs((prev) => [...prev, folder]);
   };
 

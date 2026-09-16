@@ -6,12 +6,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui
 import { useGames } from '@renderer/hooks/useGames';
 import { api } from '@renderer/lib/api';
 import { useDialogStore } from '@renderer/store/useDialogStore';
+import type { GameCardProps } from '@renderer/types/game-card.type';
 import type { Game } from '@shared/types';
 import { FolderOpenIcon, HistoryIcon, PencilIcon, TrashIcon, UploadIcon } from 'lucide-react';
-
-interface GameCardProps {
-  game: Game;
-}
 
 function statusBadge(game: Game): React.JSX.Element {
   if (game.lastBackupStatus === 'success') {

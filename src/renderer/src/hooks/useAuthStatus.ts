@@ -1,5 +1,6 @@
 import { toast } from '@renderer/components/ui/toast';
 import { api } from '@renderer/lib/api';
+import type { UseAuthStatusResult } from '@renderer/types/use-auth-status.type';
 import type { AuthStatus } from '@shared/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -12,12 +13,7 @@ const DISCONNECTED: AuthStatus = {
   rootFolderPath: null,
 };
 
-export function useAuthStatus(): {
-  status: AuthStatus;
-  connect: () => Promise<void>;
-  disconnect: () => Promise<void>;
-  setRootFolder: (folder: { id: string; path: string }) => Promise<void>;
-} {
+export function useAuthStatus(): UseAuthStatusResult {
   const queryClient = useQueryClient();
 
   const { data: status = DISCONNECTED } = useQuery({

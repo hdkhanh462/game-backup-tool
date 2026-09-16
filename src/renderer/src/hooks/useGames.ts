@@ -1,16 +1,11 @@
 import { api } from '@renderer/lib/api';
+import type { UseGamesResult } from '@renderer/types/use-games.type';
 import type { Game, GameInput } from '@shared/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 const GAMES_KEY = ['games'] as const;
 
-export function useGames(): {
-  games: Game[];
-  isLoading: boolean;
-  addGame: (input: GameInput) => Promise<Game>;
-  updateGame: (id: string, patch: Partial<GameInput>) => Promise<Game>;
-  removeGame: (id: string) => Promise<void>;
-} {
+export function useGames(): UseGamesResult {
   const queryClient = useQueryClient();
 
   const { data: games = [], isLoading } = useQuery({
