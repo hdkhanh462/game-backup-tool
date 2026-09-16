@@ -1,6 +1,7 @@
 import { Button } from '@renderer/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@renderer/components/ui/dialog';
 import { Empty, EmptyDescription, EmptyMedia, EmptyTitle } from '@renderer/components/ui/empty';
+import { Input } from '@renderer/components/ui/input';
 import { Spinner } from '@renderer/components/ui/spinner';
 import { toast } from '@renderer/components/ui/toast';
 import { useAuthStatus } from '@renderer/features/auth/hooks/useAuthStatus';
@@ -10,7 +11,7 @@ import { api } from '@renderer/lib/api';
 import { useDialogStore } from '@renderer/store/useDialogStore';
 import { useQuery } from '@tanstack/react-query';
 import { CloudDownloadIcon, FolderIcon } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export function ImportGamesDialog(): React.JSX.Element {
   const { open } = useDialogStore((state) => state.importGamesDialog);
@@ -20,6 +21,13 @@ export function ImportGamesDialog(): React.JSX.Element {
 
   const [localPaths, setLocalPaths] = useState<Record<string, string>>({});
   const [importingId, setImportingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!open) {
+      setLocalPaths({});
+      setImportingId(null);
+    }
+  }, [open]);
 
   const { data: candidates = [], isLoading } = useQuery(gamesQueries.importCandidates(open && status.state === 'connected'));
 
@@ -77,9 +85,10 @@ export function ImportGamesDialog(): React.JSX.Element {
                   <p className="truncate text-xs text-muted-foreground">{candidate.path}</p>
                 </div>
                 <div className="flex items-center gap-2">
+                  <Input readOnly value={localPaths[candidate.id] ?? ''} placeholder="Not selected" className="min-w-0 flex-1" />
                   <Button type="button" variant="outline" size="sm" onClick={() => handleBrowse(candidate.id)}>
                     <FolderIcon data-icon="inline-start" />
-                    {localPaths[candidate.id] ?? 'Choose local folder'}
+                    Browse
                   </Button>
                   <Button type="button" size="sm" disabled={!localPaths[candidate.id] || (isAdding && importingId === candidate.id)} onClick={() => handleImport(candidate)}>
                     Import

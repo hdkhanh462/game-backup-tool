@@ -42,6 +42,8 @@ export function GoogleAccountBar(): React.JSX.Element {
         <DropdownMenuItem
           onClick={() =>
             openDriveFolderPicker({
+              currentFolderId: status.rootFolderId ?? undefined,
+              currentFolderPath: status.rootFolderPath ?? undefined,
               onSelect: (folder) => {
                 setRootFolder(folder, {
                   onSuccess: () => toast.add({ title: `Backup folder set to "${folder.path}"`, type: 'success' }),

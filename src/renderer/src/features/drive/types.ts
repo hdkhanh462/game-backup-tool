@@ -11,5 +11,7 @@ export interface DriveFolderSelection {
 export interface DriveFolderPickerRequest {
   startParentId?: string;
   startPath?: string;
+  currentFolderId?: string;
+  currentFolderPath?: string;
   onSelect: (folder: DriveFolderSelection) => void | Promise<void>;
 }

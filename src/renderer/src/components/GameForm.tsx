@@ -27,6 +27,7 @@ export function GameForm({ defaultValues, isConnected, isPending, rootFolderId, 
     control,
     handleSubmit,
     setValue,
+    getValues,
     formState: { isSubmitting },
   } = useForm<GameFormValues>({
     resolver: zodResolver(gameFormSchema),
@@ -95,6 +96,8 @@ export function GameForm({ defaultValues, isConnected, isPending, rootFolderId, 
                         openDriveFolderPicker({
                           startParentId: rootFolderId ?? 'root',
                           startPath: rootFolderPath ?? 'My Drive',
+                          currentFolderId: getValues('driveFolderId') ?? undefined,
+                          currentFolderPath: getValues('driveFolderPath') ?? undefined,
                           onSelect: (folder) => {
                             setValue('driveFolderId', folder.id);
                             field.onChange(folder.path);

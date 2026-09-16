@@ -17,6 +17,8 @@ export function DriveFolderPickerDialog(): React.JSX.Element {
 
   const startParentId = request?.startParentId ?? 'root';
   const startPath = request?.startPath ?? 'My Drive';
+  const currentFolderId = request?.currentFolderId;
+  const currentFolderName = request?.currentFolderPath?.split('/').filter(Boolean).pop();
 
   const [breadcrumbs, setBreadcrumbs] = useState<DriveFolderCrumb[]>([{ id: startParentId, name: startPath }]);
   const [newFolderName, setNewFolderName] = useState('');
@@ -25,8 +27,17 @@ export function DriveFolderPickerDialog(): React.JSX.Element {
   const currentFolder = breadcrumbs[breadcrumbs.length - 1];
 
   useEffect(() => {
-    if (open) setBreadcrumbs([{ id: startParentId, name: startPath }]);
-  }, [open, startParentId, startPath]);
+    setNewFolderName('');
+    if (!open) return;
+    setBreadcrumbs(
+      currentFolderId
+        ? [
+            { id: startParentId, name: startPath },
+            { id: currentFolderId, name: currentFolderName ?? 'Current folder' },
+          ]
+        : [{ id: startParentId, name: startPath }],
+    );
+  }, [open, startParentId, startPath, currentFolderId, currentFolderName]);
 
   const { data: folders = [], isLoading } = useQuery(driveQueries.folders(currentFolder.id, open));
   const createFolderMutation = useMutation(driveMutations.createFolder(currentFolder.id));
@@ -73,6 +84,7 @@ export function DriveFolderPickerDialog(): React.JSX.Element {
             </span>
           ))}
         </div>
+        {request?.currentFolderPath && <p className="truncate text-xs text-muted-foreground">Currently selected: {request.currentFolderPath}</p>}
 
         <div className="flex max-h-64 flex-col gap-1 overflow-y-auto rounded-md border p-2">
           {isLoading ? (
