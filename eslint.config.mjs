@@ -36,7 +36,7 @@ export const config = [
     },
   },
   {
-    ignores: ['dist/**', 'coverage/**', 'out/**', 'node_modules/**'],
+    ignores: ['dist/**', 'coverage/**', 'out/**', 'node_modules/**', '.agents/**', '.claude/**'],
   },
 ];
 
