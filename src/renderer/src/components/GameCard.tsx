@@ -74,7 +74,8 @@ export function GameCard({ game }: GameCardProps): React.JSX.Element {
   };
 
   const progress = operation?.progress;
-  const progressPercent = progress && progress.bytesTotal > 0 ? Math.round((progress.bytesDone / progress.bytesTotal) * 100) : 0;
+  const isPreTransfer = progress?.phase === 'scanning' || progress?.phase === 'diffing';
+  const progressPercent = progress && !isPreTransfer && progress.bytesTotal > 0 ? Math.min(100, Math.round((progress.bytesDone / progress.bytesTotal) * 100)) : 0;
 
   return (
     <Card>

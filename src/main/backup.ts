@@ -150,7 +150,7 @@ export async function runBackup(game: Game, onProgress: (progress: TransferProgr
       scanned.push({ relativePath, absolutePath, size, sha256 });
     }
 
-    emit({ phase: 'diffing', filesDone: filesTotal, filesTotal, bytesDone: hashedBytes, bytesTotal });
+    emit({ phase: 'diffing', filesDone: 0, filesTotal, bytesDone: 0, bytesTotal });
     const settings = await settingsModule.get();
     const previousManifest = settings.incrementalBackupEnabled ? await fetchLatestManifest(game.driveFolderId) : null;
     const previousByPath = new Map((previousManifest?.files ?? []).map((f) => [f.path, f] as const));
