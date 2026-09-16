@@ -1,36 +1,33 @@
-import { api } from '@renderer/lib/api';
+import { queryKeys } from '@renderer/lib/queryKeys';
+import { gamesMutations } from '@renderer/mutations/games.mutations';
+import { gamesQueries } from '@renderer/queries/games.queries';
 import type { UseGamesResult } from '@renderer/types/use-games.type';
-import type { Game, GameInput } from '@shared/types';
+import type { Game } from '@shared/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-
-const GAMES_KEY = ['games'] as const;
 
 export function useGames(): UseGamesResult {
   const queryClient = useQueryClient();
 
-  const { data: games = [], isLoading } = useQuery({
-    queryKey: GAMES_KEY,
-    queryFn: () => api.games.list(),
-  });
+  const { data: games = [], isLoading } = useQuery(gamesQueries.list());
 
   const addMutation = useMutation({
-    mutationFn: (input: GameInput) => api.games.add(input),
+    ...gamesMutations.add(),
     onSuccess: (game) => {
-      queryClient.setQueryData<Game[]>(GAMES_KEY, (prev) => [...(prev ?? []), game]);
+      queryClient.setQueryData<Game[]>(queryKeys.games.all(), (prev) => [...(prev ?? []), game]);
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, patch }: { id: string; patch: Partial<GameInput> }) => api.games.update(id, patch),
+    ...gamesMutations.update(),
     onSuccess: (updated) => {
-      queryClient.setQueryData<Game[]>(GAMES_KEY, (prev) => (prev ?? []).map((g) => (g.id === updated.id ? updated : g)));
+      queryClient.setQueryData<Game[]>(queryKeys.games.all(), (prev) => (prev ?? []).map((g) => (g.id === updated.id ? updated : g)));
     },
   });
 
   const removeMutation = useMutation({
-    mutationFn: (id: string) => api.games.remove(id),
+    ...gamesMutations.remove(),
     onSuccess: (_data, id) => {
-      queryClient.setQueryData<Game[]>(GAMES_KEY, (prev) => (prev ?? []).filter((g) => g.id !== id));
+      queryClient.setQueryData<Game[]>(queryKeys.games.all(), (prev) => (prev ?? []).filter((g) => g.id !== id));
     },
   });
 

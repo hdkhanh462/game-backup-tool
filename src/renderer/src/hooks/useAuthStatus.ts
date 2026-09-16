@@ -1,10 +1,11 @@
 import { toast } from '@renderer/components/ui/toast';
 import { api } from '@renderer/lib/api';
+import { queryKeys } from '@renderer/lib/queryKeys';
+import { authMutations } from '@renderer/mutations/auth.mutations';
+import { authQueries } from '@renderer/queries/auth.queries';
 import type { UseAuthStatusResult } from '@renderer/types/use-auth-status.type';
 import type { AuthStatus } from '@shared/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-
-const AUTH_STATUS_KEY = ['auth', 'status'] as const;
 
 const DISCONNECTED: AuthStatus = {
   state: 'disconnected',
@@ -17,7 +18,7 @@ export function useAuthStatus(): UseAuthStatusResult {
   const queryClient = useQueryClient();
 
   const { data: status = DISCONNECTED } = useQuery({
-    queryKey: AUTH_STATUS_KEY,
+    ...authQueries.status(),
     queryFn: async () => {
       const next = await api.auth.getStatus();
       if (next.state === 'error' && next.error) {
@@ -28,12 +29,12 @@ export function useAuthStatus(): UseAuthStatusResult {
   });
 
   const connectMutation = useMutation({
-    mutationFn: () => api.auth.connect(),
+    ...authMutations.connect(),
     onMutate: () => {
-      queryClient.setQueryData<AuthStatus>(AUTH_STATUS_KEY, (prev) => ({ ...(prev ?? DISCONNECTED), state: 'connecting' }));
+      queryClient.setQueryData<AuthStatus>(queryKeys.auth.status(), (prev) => ({ ...(prev ?? DISCONNECTED), state: 'connecting' }));
     },
     onSuccess: (next) => {
-      queryClient.setQueryData(AUTH_STATUS_KEY, next);
+      queryClient.setQueryData(queryKeys.auth.status(), next);
       if (next.state === 'error' && next.error) {
         toast.add({ title: 'Failed to connect to Google Drive', description: next.error, type: 'error' });
       } else if (next.state === 'connected') {
@@ -43,17 +44,17 @@ export function useAuthStatus(): UseAuthStatusResult {
   });
 
   const disconnectMutation = useMutation({
-    mutationFn: () => api.auth.disconnect(),
+    ...authMutations.disconnect(),
     onSuccess: () => {
-      queryClient.setQueryData(AUTH_STATUS_KEY, DISCONNECTED);
+      queryClient.setQueryData(queryKeys.auth.status(), DISCONNECTED);
       toast.add({ title: 'Disconnected from Google Drive', type: 'info' });
     },
   });
 
   const setRootFolderMutation = useMutation({
-    mutationFn: (folder: { id: string; path: string }) => api.auth.setRootFolder(folder),
+    ...authMutations.setRootFolder(),
     onSuccess: (next) => {
-      queryClient.setQueryData(AUTH_STATUS_KEY, next);
+      queryClient.setQueryData(queryKeys.auth.status(), next);
     },
   });
 

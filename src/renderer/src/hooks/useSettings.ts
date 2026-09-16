@@ -1,4 +1,6 @@
-import { api } from '@renderer/lib/api';
+import { queryKeys } from '@renderer/lib/queryKeys';
+import { settingsMutations } from '@renderer/mutations/settings.mutations';
+import { settingsQueries } from '@renderer/queries/settings.queries';
 import type { UseSettingsResult } from '@renderer/types/use-settings.type';
 import type { AppSettings } from '@shared/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -14,15 +16,12 @@ const DEFAULT_SETTINGS: AppSettings = {
 export function useSettings(): UseSettingsResult {
   const queryClient = useQueryClient();
 
-  const { data: settings = DEFAULT_SETTINGS, isLoading } = useQuery({
-    queryKey: ['settings'],
-    queryFn: () => api.settings.get(),
-  });
+  const { data: settings = DEFAULT_SETTINGS, isLoading } = useQuery(settingsQueries.all());
 
   const updateMutation = useMutation({
-    mutationFn: (patch: Partial<AppSettings>) => api.settings.update(patch),
+    ...settingsMutations.update(),
     onSuccess: (updated) => {
-      queryClient.setQueryData(['settings'], updated);
+      queryClient.setQueryData(queryKeys.settings.all(), updated);
     },
   });
 

@@ -1,7 +1,8 @@
 import { api } from '@renderer/lib/api';
+import { backupMutations } from '@renderer/mutations/backup.mutations';
+import { restoreMutations } from '@renderer/mutations/restore.mutations';
 import { useOperationStore } from '@renderer/store/useOperationStore';
 import type { UseBackupResult } from '@renderer/types/use-backup.type';
-import type { RestoreOptions } from '@shared/types';
 import { useMutation } from '@tanstack/react-query';
 import { useEffect } from 'react';
 
@@ -25,15 +26,13 @@ export function useBackup(gameId: string): UseBackupResult {
   }, [gameId, setOperation]);
 
   const runMutation = useMutation({
-    mutationFn: () => api.backup.run(gameId),
-    meta: { invalidateQueriesMultiple: [['games'], ['backupVersions', gameId]] },
+    ...backupMutations.run(gameId),
     onMutate: () => setOperation(gameId, { type: 'backup', progress: null }),
     onSettled: () => setOperation(gameId, null),
   });
 
   const restoreMutation = useMutation({
-    mutationFn: ({ versionId, options }: { versionId: string; options: RestoreOptions }) => api.restore.run(gameId, versionId, options),
-    meta: { invalidateQueries: ['games'] },
+    ...restoreMutations.run(gameId),
     onMutate: () => setOperation(gameId, { type: 'restore', progress: null }),
     onSettled: () => setOperation(gameId, null),
   });
