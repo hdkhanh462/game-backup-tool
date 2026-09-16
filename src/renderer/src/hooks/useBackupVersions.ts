@@ -1,9 +1,8 @@
 import { api } from '@renderer/lib/api';
 import type { UseBackupVersionsResult } from '@renderer/types/use-backup-versions.type';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
 export function useBackupVersions(gameId: string, enabled: boolean): UseBackupVersionsResult {
-  const queryClient = useQueryClient();
   const queryKey = ['backupVersions', gameId] as const;
 
   const {
@@ -20,9 +19,7 @@ export function useBackupVersions(gameId: string, enabled: boolean): UseBackupVe
 
   const deleteMutation = useMutation({
     mutationFn: (versionId: string) => api.backup.deleteVersion(gameId, versionId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey });
-    },
+    meta: { invalidateQueries: queryKey },
   });
 
   return {
