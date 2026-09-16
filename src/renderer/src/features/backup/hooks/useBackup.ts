@@ -1,4 +1,4 @@
-import type { RestoreOptions } from '@shared/types';
+import type { RestoreOptions, TransferProgress } from '@shared/types';
 import { useMutation } from '@tanstack/react-query';
 import { useEffect } from 'react';
 
@@ -12,14 +12,18 @@ export function useBackup(gameId: string): UseBackupResult {
   const operation = useOperationStore((state) => state.operations[gameId] ?? null);
 
   useEffect(() => {
-    const unsubscribeBackup = backupApi.onProgress((progress) => {
-      if (progress.gameId !== gameId) return;
-      setOperation(gameId, { type: 'backup', progress });
-    });
-    const unsubscribeRestore = restoreApi.onProgress((progress) => {
-      if (progress.gameId !== gameId) return;
-      setOperation(gameId, { type: 'restore', progress });
-    });
+    const handleProgress =
+      (type: 'backup' | 'restore') =>
+      (progress: TransferProgress): void => {
+        if (progress.gameId !== gameId) return;
+        if (progress.phase === 'done' || progress.phase === 'error') {
+          setOperation(gameId, null);
+          return;
+        }
+        setOperation(gameId, { type, progress });
+      };
+    const unsubscribeBackup = backupApi.onProgress(handleProgress('backup'));
+    const unsubscribeRestore = restoreApi.onProgress(handleProgress('restore'));
     return () => {
       unsubscribeBackup();
       unsubscribeRestore();

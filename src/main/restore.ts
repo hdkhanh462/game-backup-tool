@@ -1,6 +1,7 @@
 import { createWriteStream } from 'fs';
 import { mkdir, readdir, rm } from 'fs/promises';
 import path from 'path';
+import { PassThrough } from 'stream';
 import { pipeline } from 'stream/promises';
 
 import type { Game, RestoreOptions, TransferProgress } from '../shared/types';
@@ -28,7 +29,7 @@ export async function runRestore(game: Game, versionId: string, options: Restore
   if (!game.driveFolderId) throw new Error('This game has no Drive folder configured');
 
   const emit = (partial: Omit<TransferProgress, 'gameId' | 'op'>): void => {
-    onProgress({ gameId: game.id, op: 'restore', ...partial });
+    onProgress({ ...partial, gameId: game.id, op: 'restore' });
   };
 
   emit({ phase: 'safetyBackup', filesDone: 0, filesTotal: 0, bytesDone: 0, bytesTotal: 0 });
@@ -53,11 +54,12 @@ export async function runRestore(game: Game, versionId: string, options: Restore
     emit({ phase: 'downloading', currentFile: entry.path, filesDone, filesTotal, bytesDone, bytesTotal });
     const readable = await drive.downloadFileStream(entry.fileId);
     let fileBytesDone = 0;
-    readable.on('data', (chunk: string | Buffer) => {
+    const progressStream = new PassThrough();
+    progressStream.on('data', (chunk: Buffer) => {
       fileBytesDone += chunk.length;
       emit({ phase: 'downloading', currentFile: entry.path, filesDone, filesTotal, bytesDone: bytesDone + fileBytesDone, bytesTotal });
     });
-    await pipeline(readable, createWriteStream(destPath));
+    await pipeline(readable, progressStream, createWriteStream(destPath));
 
     bytesDone += entry.size;
     filesDone += 1;

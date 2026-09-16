@@ -127,7 +127,7 @@ export async function runBackup(game: Game, onProgress: (progress: TransferProgr
   if (!game.driveFolderId) throw new Error('This game has no Drive folder configured');
 
   const emit = (partial: Omit<TransferProgress, 'gameId' | 'op'>): void => {
-    onProgress({ gameId, op: 'backup', ...partial });
+    onProgress({ ...partial, gameId, op: 'backup' });
   };
 
   try {

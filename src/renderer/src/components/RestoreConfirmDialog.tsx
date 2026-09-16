@@ -26,13 +26,11 @@ export function RestoreConfirmDialog(): React.JSX.Element {
       version.id,
       { safetyBackup, deleteExtraneous: true },
       {
-        onSuccess: () => {
-          toast.add({ title: `${game.name} restored to ${version.name}`, type: 'success' });
-          closeRestoreConfirmDialog();
-        },
+        onSuccess: () => toast.add({ title: `${game.name} restored to ${version.name}`, type: 'success' }),
         onError: (error) => toast.add({ title: 'Restore failed', description: String(error), type: 'error' }),
       },
     );
+    closeRestoreConfirmDialog();
   };
 
   return (
