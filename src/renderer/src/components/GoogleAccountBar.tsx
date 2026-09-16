@@ -5,7 +5,7 @@ import { Spinner } from '@renderer/components/ui/spinner';
 import { toast } from '@renderer/components/ui/toast';
 import { useAuthStatus } from '@renderer/features/auth/hooks/useAuthStatus';
 import { useDialogStore } from '@renderer/store/useDialogStore';
-import { ChevronDownIcon, CloudIcon, LogOutIcon, SettingsIcon } from 'lucide-react';
+import { ChevronDownIcon, CloudIcon, FolderIcon, LogOutIcon, SettingsIcon } from 'lucide-react';
 
 export function GoogleAccountBar(): React.JSX.Element {
   const { status, connect, disconnect, setRootFolder } = useAuthStatus();
@@ -61,6 +61,7 @@ export function GoogleAccountBar(): React.JSX.Element {
             })
           }
         >
+          <FolderIcon data-icon="inline-start" />
           Change backup folder
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => openSettingsDialog()}>

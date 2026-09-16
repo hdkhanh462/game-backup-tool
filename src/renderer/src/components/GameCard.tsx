@@ -1,6 +1,7 @@
 import { Badge } from '@renderer/components/ui/badge';
 import { Button } from '@renderer/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@renderer/components/ui/card';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@renderer/components/ui/dropdown-menu';
 import { Progress } from '@renderer/components/ui/progress';
 import { toast } from '@renderer/components/ui/toast';
 import { backupApi } from '@renderer/features/backup/api';
@@ -12,7 +13,7 @@ import { api } from '@renderer/lib/api';
 import { formatBytes } from '@renderer/lib/format';
 import { useDialogStore } from '@renderer/store/useDialogStore';
 import type { Game } from '@shared/types';
-import { FolderOpenIcon, HistoryIcon, PencilIcon, TrashIcon, UploadIcon } from 'lucide-react';
+import { FolderOpenIcon, HistoryIcon, MoreVerticalIcon, PencilIcon, TrashIcon, UploadIcon } from 'lucide-react';
 
 function statusBadge(game: Game): React.JSX.Element {
   if (game.lastBackupStatus === 'success') {
@@ -108,18 +109,26 @@ export function GameCard({ game }: GameCardProps): React.JSX.Element {
           <HistoryIcon data-icon="inline-start" />
           History
         </Button>
-        <Button size="sm" variant="ghost" onClick={() => api.system.openPath(game.localPath)}>
-          <FolderOpenIcon data-icon="inline-start" />
-          Open Save Folder
-        </Button>
-        <Button size="sm" variant="ghost" disabled={isBusy} onClick={() => openEditGameDialog(game)}>
-          <PencilIcon data-icon="inline-start" />
-          Edit
-        </Button>
-        <Button size="sm" variant="ghost" disabled={isBusy} onClick={handleRemove}>
-          <TrashIcon data-icon="inline-start" />
-          Remove
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger render={<Button size="icon" variant="ghost" className="ml-auto" />}>
+            <MoreVerticalIcon />
+            <span className="sr-only">More actions</span>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-auto min-w-48">
+            <DropdownMenuItem onClick={() => api.system.openPath(game.localPath)}>
+              <FolderOpenIcon data-icon="inline-start" />
+              Open Save Folder
+            </DropdownMenuItem>
+            <DropdownMenuItem disabled={isBusy} onClick={() => openEditGameDialog(game)}>
+              <PencilIcon data-icon="inline-start" />
+              Edit
+            </DropdownMenuItem>
+            <DropdownMenuItem variant="destructive" disabled={isBusy} onClick={handleRemove}>
+              <TrashIcon data-icon="inline-start" />
+              Remove
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </CardFooter>
     </Card>
   );

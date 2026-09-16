@@ -88,7 +88,7 @@ export function SettingsDialog(): React.JSX.Element {
                   <FieldLabel>Theme</FieldLabel>
                   <FieldContent>
                     <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
                         <SelectValue>{(value: string) => THEME_LABELS[value] ?? value}</SelectValue>
                       </SelectTrigger>
                       <SelectContent>
@@ -109,7 +109,7 @@ export function SettingsDialog(): React.JSX.Element {
                   <FieldLabel>Language</FieldLabel>
                   <FieldContent>
                     <Select value={field.value ?? 'en'} onValueChange={field.onChange}>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
                         <SelectValue>{(value: string) => LANGUAGE_LABELS[value] ?? value}</SelectValue>
                       </SelectTrigger>
                       <SelectContent>

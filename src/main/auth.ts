@@ -59,6 +59,11 @@ async function fetchProfile(activeClient: OAuth2Client): Promise<GoogleProfile> 
   }
 }
 
+function isInvalidGrantError(error: unknown): boolean {
+  const data = (error as { response?: { data?: { error?: string } } })?.response?.data;
+  return data?.error === 'invalid_grant';
+}
+
 export function getStatus(): AuthStatus {
   return currentState;
 }
@@ -112,9 +117,24 @@ export async function tryRestoreSession(): Promise<AuthStatus> {
       rootFolderId: store.get('auth.rootFolderId'),
       rootFolderPath: store.get('auth.rootFolderPath'),
     };
-  } catch {
-    await clearRefreshToken();
-    currentState = { state: 'disconnected', email: null, name: null, picture: null, rootFolderId: null, rootFolderPath: null };
+  } catch (error) {
+    if (isInvalidGrantError(error)) {
+      // The refresh token itself is no longer valid (revoked, expired) — a real sign-out.
+      await clearRefreshToken();
+      currentState = { state: 'disconnected', email: null, name: null, picture: null, rootFolderId: null, rootFolderPath: null };
+    } else {
+      // A transient failure (network, DNS, Google outage) — keep the refresh token so the
+      // next launch can recover automatically instead of forcing the user to reconnect.
+      currentState = {
+        state: 'error',
+        email: null,
+        name: null,
+        picture: null,
+        rootFolderId: null,
+        rootFolderPath: null,
+        error: 'Could not reach Google — check your connection and try again',
+      };
+    }
   }
 
   return currentState;
