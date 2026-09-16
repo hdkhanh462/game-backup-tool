@@ -4,13 +4,13 @@ import { queryOptions } from '@tanstack/react-query';
 import { authApi } from './api';
 
 export const authKeys = {
-  status: () => ['auth', 'status'] as const,
+  status: ['auth', 'status'] as const,
 };
 
 export const authQueries = {
   status: () =>
     queryOptions({
-      queryKey: authKeys.status(),
+      queryKey: authKeys.status,
       queryFn: async () => {
         const next = await authApi.getStatus();
         if (next.state === 'error' && next.error) {

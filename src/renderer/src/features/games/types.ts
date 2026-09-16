@@ -1,4 +1,5 @@
 import type { Game, GameInput } from '@shared/types';
+import type { UseMutateFunction } from '@tanstack/react-query';
 
 export interface GameCardProps {
   game: Game;
@@ -14,16 +15,19 @@ export interface GameFormValues {
 export interface GameFormProps {
   defaultValues?: GameFormValues;
   isConnected: boolean;
+  isPending?: boolean;
   rootFolderId: string | null;
   rootFolderPath: string | null;
-  onSubmit: (values: GameFormValues) => Promise<void> | void;
+  onSubmit: (values: GameFormValues) => void;
   onCancel: () => void;
 }
 
 export interface UseGamesResult {
   games: Game[];
   isLoading: boolean;
-  addGame: (input: GameInput) => Promise<Game>;
-  updateGame: (id: string, patch: Partial<GameInput>) => Promise<Game>;
-  removeGame: (id: string) => Promise<void>;
+  addGame: UseMutateFunction<Game, Error, GameInput>;
+  updateGame: UseMutateFunction<Game, Error, { id: string; patch: Partial<GameInput> }>;
+  removeGame: UseMutateFunction<void, Error, string>;
+  isAdding: boolean;
+  isUpdating: boolean;
 }

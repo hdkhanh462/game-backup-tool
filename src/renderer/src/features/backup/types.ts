@@ -1,4 +1,5 @@
 import type { BackupRunResult, BackupVersion, RestoreOptions, TransferOp, TransferProgress } from '@shared/types';
+import type { UseMutateFunction } from '@tanstack/react-query';
 
 export interface OperationState {
   type: TransferOp;
@@ -10,19 +11,24 @@ export interface OperationStoreState {
   setOperation: (gameId: string, state: OperationState | null) => void;
 }
 
+export interface MutationCallbacks<TData> {
+  onSuccess?: (data: TData) => void;
+  onError?: (error: Error) => void;
+}
+
 export interface UseBackupResult {
   operation: OperationState | null;
   isBusy: boolean;
   isBackupPending: boolean;
   isRestorePending: boolean;
-  runBackup: () => Promise<BackupRunResult>;
-  restoreVersion: (versionId: string, options: RestoreOptions) => Promise<void>;
+  runBackup: (callbacks?: MutationCallbacks<BackupRunResult>) => void;
+  restoreVersion: (versionId: string, options: RestoreOptions, callbacks?: MutationCallbacks<void>) => void;
 }
 
 export interface UseBackupVersionsResult {
   versions: BackupVersion[];
   isLoading: boolean;
   error: unknown;
-  deleteVersion: (versionId: string) => Promise<void>;
+  deleteVersion: UseMutateFunction<void, Error, string>;
   isDeleting: boolean;
 }

@@ -1,11 +1,11 @@
-import type { BackupRunResult, RestoreOptions } from '@shared/types';
+import type { RestoreOptions } from '@shared/types';
 import { useMutation } from '@tanstack/react-query';
 import { useEffect } from 'react';
 
-import { backupApi, restoreApi } from './api';
-import { backupMutations, restoreMutations } from './mutations';
-import { useOperationStore } from './operationStore';
-import type { UseBackupResult } from './types';
+import { backupApi, restoreApi } from '../api';
+import { backupMutations, restoreMutations } from '../mutations';
+import { useOperationStore } from '../operationStore';
+import type { MutationCallbacks, UseBackupResult } from '../types';
 
 export function useBackup(gameId: string): UseBackupResult {
   const setOperation = useOperationStore((state) => state.setOperation);
@@ -29,22 +29,25 @@ export function useBackup(gameId: string): UseBackupResult {
   const runMutation = useMutation(backupMutations.run(gameId));
   const restoreMutation = useMutation(restoreMutations.run(gameId));
 
-  const runBackup = async (): Promise<BackupRunResult> => {
+  const runBackup: UseBackupResult['runBackup'] = (callbacks) => {
     setOperation(gameId, { type: 'backup', progress: null });
-    try {
-      return await runMutation.mutateAsync();
-    } finally {
-      setOperation(gameId, null);
-    }
+    runMutation.mutate(undefined, {
+      onSuccess: callbacks?.onSuccess,
+      onError: callbacks?.onError,
+      onSettled: () => setOperation(gameId, null),
+    });
   };
 
-  const restoreVersion = async (versionId: string, options: RestoreOptions): Promise<void> => {
+  const restoreVersion = (versionId: string, options: RestoreOptions, callbacks?: MutationCallbacks<void>): void => {
     setOperation(gameId, { type: 'restore', progress: null });
-    try {
-      await restoreMutation.mutateAsync({ versionId, options });
-    } finally {
-      setOperation(gameId, null);
-    }
+    restoreMutation.mutate(
+      { versionId, options },
+      {
+        onSuccess: callbacks?.onSuccess,
+        onError: callbacks?.onError,
+        onSettled: () => setOperation(gameId, null),
+      },
+    );
   };
 
   return {

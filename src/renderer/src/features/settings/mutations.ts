@@ -11,7 +11,7 @@ export const settingsMutations = {
       mutationKey: ['settings', 'update'],
       mutationFn: (patch: Partial<AppSettings>) => settingsApi.update(patch),
       onSuccess: (updated) => {
-        queryClient.setQueryData(settingsKeys.all(), updated);
+        queryClient.setQueryData(settingsKeys.all, updated);
       },
     }),
 };

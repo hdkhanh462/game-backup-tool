@@ -2,8 +2,8 @@ import { Button } from '@renderer/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@renderer/components/ui/dialog';
 import { Spinner } from '@renderer/components/ui/spinner';
 import { toast } from '@renderer/components/ui/toast';
-import { useBackup } from '@renderer/features/backup/useBackup';
-import { useBackupVersions } from '@renderer/features/backup/useBackupVersions';
+import { useBackup } from '@renderer/features/backup/hooks/useBackup';
+import { useBackupVersions } from '@renderer/features/backup/hooks/useBackupVersions';
 import { formatBytes } from '@renderer/lib/format';
 import { useDialogStore } from '@renderer/store/useDialogStore';
 import { TrashIcon } from 'lucide-react';
@@ -16,14 +16,12 @@ export function BackupHistoryDialog(): React.JSX.Element {
   const { versions, isLoading, deleteVersion } = useBackupVersions(gameId, open);
   const { isBusy } = useBackup(gameId);
 
-  const handleDelete = async (versionId: string, name: string): Promise<void> => {
+  const handleDelete = (versionId: string, name: string): void => {
     if (!window.confirm(`Permanently delete backup version "${name}"? This cannot be undone.`)) return;
-    try {
-      await deleteVersion(versionId);
-      toast.add({ title: `Version ${name} deleted`, type: 'info' });
-    } catch (error) {
-      toast.add({ title: 'Failed to delete version', description: String(error), type: 'error' });
-    }
+    deleteVersion(versionId, {
+      onSuccess: () => toast.add({ title: `Version ${name} deleted`, type: 'info' }),
+      onError: (error) => toast.add({ title: 'Failed to delete version', description: String(error), type: 'error' }),
+    });
   };
 
   return (

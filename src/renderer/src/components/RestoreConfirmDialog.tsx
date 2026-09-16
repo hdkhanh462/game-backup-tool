@@ -4,8 +4,8 @@ import { Field, FieldContent, FieldLabel } from '@renderer/components/ui/field';
 import { Spinner } from '@renderer/components/ui/spinner';
 import { Switch } from '@renderer/components/ui/switch';
 import { toast } from '@renderer/components/ui/toast';
-import { useBackup } from '@renderer/features/backup/useBackup';
-import { useSettings } from '@renderer/features/settings/useSettings';
+import { useBackup } from '@renderer/features/backup/hooks/useBackup';
+import { useSettings } from '@renderer/features/settings/hooks/useSettings';
 import { useDialogStore } from '@renderer/store/useDialogStore';
 import { useEffect, useState } from 'react';
 
@@ -20,15 +20,19 @@ export function RestoreConfirmDialog(): React.JSX.Element {
     if (open) setSafetyBackup(settings.safetyBackupBeforeRestore);
   }, [open, settings.safetyBackupBeforeRestore]);
 
-  const handleConfirm = async (): Promise<void> => {
+  const handleConfirm = (): void => {
     if (!game || !version) return;
-    try {
-      await restoreVersion(version.id, { safetyBackup, deleteExtraneous: true });
-      toast.add({ title: `${game.name} restored to ${version.name}`, type: 'success' });
-      closeRestoreConfirmDialog();
-    } catch (error) {
-      toast.add({ title: 'Restore failed', description: String(error), type: 'error' });
-    }
+    restoreVersion(
+      version.id,
+      { safetyBackup, deleteExtraneous: true },
+      {
+        onSuccess: () => {
+          toast.add({ title: `${game.name} restored to ${version.name}`, type: 'success' });
+          closeRestoreConfirmDialog();
+        },
+        onError: (error) => toast.add({ title: 'Restore failed', description: String(error), type: 'error' }),
+      },
+    );
   };
 
   return (

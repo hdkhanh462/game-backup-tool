@@ -1,8 +1,8 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-import { gamesMutations } from './mutations';
-import { gamesQueries } from './queries';
-import type { UseGamesResult } from './types';
+import { gamesMutations } from '../mutations';
+import { gamesQueries } from '../queries';
+import type { UseGamesResult } from '../types';
 
 export function useGames(): UseGamesResult {
   const { data: games = [], isLoading } = useQuery(gamesQueries.list());
@@ -13,8 +13,10 @@ export function useGames(): UseGamesResult {
   return {
     games,
     isLoading,
-    addGame: (input) => addMutation.mutateAsync(input),
-    updateGame: (id, patch) => updateMutation.mutateAsync({ id, patch }),
-    removeGame: (id) => removeMutation.mutateAsync(id),
+    addGame: addMutation.mutate,
+    updateGame: updateMutation.mutate,
+    removeGame: removeMutation.mutate,
+    isAdding: addMutation.isPending,
+    isUpdating: updateMutation.isPending,
   };
 }

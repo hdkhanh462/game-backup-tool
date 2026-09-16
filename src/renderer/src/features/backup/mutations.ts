@@ -12,7 +12,7 @@ export const backupMutations = {
       mutationKey: ['backup', 'run', gameId],
       mutationFn: () => backupApi.run(gameId),
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: gamesKeys.all() });
+        queryClient.invalidateQueries({ queryKey: gamesKeys.all });
         queryClient.invalidateQueries({ queryKey: backupVersionsKeys.all(gameId) });
       },
     }),
@@ -24,7 +24,7 @@ export const restoreMutations = {
       mutationKey: ['restore', 'run', gameId],
       mutationFn: ({ versionId, options }: { versionId: string; options: RestoreOptions }) => restoreApi.run(gameId, versionId, options),
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: gamesKeys.all() });
+        queryClient.invalidateQueries({ queryKey: gamesKeys.all });
       },
     }),
 };

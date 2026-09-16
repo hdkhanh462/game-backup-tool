@@ -1,26 +1,31 @@
 import { GameForm } from '@renderer/components/GameForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@renderer/components/ui/dialog';
 import { toast } from '@renderer/components/ui/toast';
-import { useAuthStatus } from '@renderer/features/auth/useAuthStatus';
+import { useAuthStatus } from '@renderer/features/auth/hooks/useAuthStatus';
+import { useGames } from '@renderer/features/games/hooks/useGames';
 import type { GameFormValues } from '@renderer/features/games/types';
-import { useGames } from '@renderer/features/games/useGames';
 import { useDialogStore } from '@renderer/store/useDialogStore';
 
 export function AddEditGameDialog(): React.JSX.Element {
   const { open, game } = useDialogStore((state) => state.gameDialog);
   const closeGameDialog = useDialogStore((state) => state.closeGameDialog);
   const { status } = useAuthStatus();
-  const { addGame, updateGame } = useGames();
+  const { addGame, updateGame, isAdding, isUpdating } = useGames();
 
-  const handleSubmit = async (values: GameFormValues): Promise<void> => {
+  const handleSubmit = (values: GameFormValues): void => {
+    const onSuccess = (): void => {
+      toast.add({ title: `${values.name} ${game ? 'updated' : 'added'}`, type: 'success' });
+      closeGameDialog();
+    };
+    const onError = (error: Error): void => {
+      toast.add({ title: game ? 'Failed to update game' : 'Failed to add game', description: String(error), type: 'error' });
+    };
+
     if (game) {
-      await updateGame(game.id, values);
-      toast.add({ title: `${values.name} updated`, type: 'success' });
+      updateGame({ id: game.id, patch: values }, { onSuccess, onError });
     } else {
-      await addGame(values);
-      toast.add({ title: `${values.name} added`, type: 'success' });
+      addGame(values, { onSuccess, onError });
     }
-    closeGameDialog();
   };
 
   return (
@@ -35,6 +40,7 @@ export function AddEditGameDialog(): React.JSX.Element {
             key={game?.id ?? 'new'}
             defaultValues={game ? { name: game.name, localPath: game.localPath, driveFolderId: game.driveFolderId, driveFolderPath: game.driveFolderPath } : undefined}
             isConnected={status.state === 'connected'}
+            isPending={isAdding || isUpdating}
             rootFolderId={status.rootFolderId}
             rootFolderPath={status.rootFolderPath}
             onSubmit={handleSubmit}

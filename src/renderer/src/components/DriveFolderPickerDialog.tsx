@@ -39,15 +39,13 @@ export function DriveFolderPickerDialog(): React.JSX.Element {
     setBreadcrumbs((prev) => prev.slice(0, index + 1));
   };
 
-  const handleCreateFolder = async (): Promise<void> => {
+  const handleCreateFolder = (): void => {
     const name = newFolderName.trim();
     if (!name) return;
-    try {
-      await createFolderMutation.mutateAsync(name);
-      setNewFolderName('');
-    } catch (error) {
-      toast.add({ title: 'Failed to create folder', description: String(error), type: 'error' });
-    }
+    createFolderMutation.mutate(name, {
+      onSuccess: () => setNewFolderName(''),
+      onError: (error) => toast.add({ title: 'Failed to create folder', description: String(error), type: 'error' }),
+    });
   };
 
   const handleSelect = async (): Promise<void> => {

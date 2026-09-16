@@ -4,10 +4,10 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@renderer/
 import { Progress } from '@renderer/components/ui/progress';
 import { toast } from '@renderer/components/ui/toast';
 import { backupApi } from '@renderer/features/backup/api';
-import { useBackup } from '@renderer/features/backup/useBackup';
+import { useBackup } from '@renderer/features/backup/hooks/useBackup';
+import { useGames } from '@renderer/features/games/hooks/useGames';
 import type { GameCardProps } from '@renderer/features/games/types';
-import { useGames } from '@renderer/features/games/useGames';
-import { useSettings } from '@renderer/features/settings/useSettings';
+import { useSettings } from '@renderer/features/settings/hooks/useSettings';
 import { api } from '@renderer/lib/api';
 import { formatBytes } from '@renderer/lib/format';
 import { useDialogStore } from '@renderer/store/useDialogStore';
@@ -38,13 +38,11 @@ export function GameCard({ game }: GameCardProps): React.JSX.Element {
   const openRestoreConfirmDialog = useDialogStore((state) => state.openRestoreConfirmDialog);
   const { operation, isBusy, runBackup, restoreVersion } = useBackup(game.id);
 
-  const handleBackup = async (): Promise<void> => {
-    try {
-      await runBackup();
-      toast.add({ title: `${game.name} backed up`, type: 'success' });
-    } catch (error) {
-      toast.add({ title: 'Backup failed', description: String(error), type: 'error' });
-    }
+  const handleBackup = (): void => {
+    runBackup({
+      onSuccess: () => toast.add({ title: `${game.name} backed up`, type: 'success' }),
+      onError: (error) => toast.add({ title: 'Backup failed', description: String(error), type: 'error' }),
+    });
   };
 
   const handleRestoreClick = async (): Promise<void> => {
@@ -55,20 +53,24 @@ export function GameCard({ game }: GameCardProps): React.JSX.Element {
     }
     const latest = versions[0];
     if (!settings.confirmBeforeOverwrite) {
-      try {
-        await restoreVersion(latest.id, { safetyBackup: settings.safetyBackupBeforeRestore, deleteExtraneous: true });
-        toast.add({ title: `${game.name} restored`, type: 'success' });
-      } catch (error) {
-        toast.add({ title: 'Restore failed', description: String(error), type: 'error' });
-      }
+      restoreVersion(
+        latest.id,
+        { safetyBackup: settings.safetyBackupBeforeRestore, deleteExtraneous: true },
+        {
+          onSuccess: () => toast.add({ title: `${game.name} restored`, type: 'success' }),
+          onError: (error) => toast.add({ title: 'Restore failed', description: String(error), type: 'error' }),
+        },
+      );
       return;
     }
     openRestoreConfirmDialog(game, latest);
   };
 
-  const handleRemove = async (): Promise<void> => {
-    await removeGame(game.id);
-    toast.add({ title: `${game.name} removed`, type: 'info' });
+  const handleRemove = (): void => {
+    removeGame(game.id, {
+      onSuccess: () => toast.add({ title: `${game.name} removed`, type: 'info' }),
+      onError: (error) => toast.add({ title: 'Failed to remove game', description: String(error), type: 'error' }),
+    });
   };
 
   const progress = operation?.progress;

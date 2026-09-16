@@ -3,7 +3,7 @@ import { Button } from '@renderer/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@renderer/components/ui/dropdown-menu';
 import { Spinner } from '@renderer/components/ui/spinner';
 import { toast } from '@renderer/components/ui/toast';
-import { useAuthStatus } from '@renderer/features/auth/useAuthStatus';
+import { useAuthStatus } from '@renderer/features/auth/hooks/useAuthStatus';
 import { useDialogStore } from '@renderer/store/useDialogStore';
 import { ChevronDownIcon, CloudIcon, LogOutIcon } from 'lucide-react';
 
@@ -42,9 +42,10 @@ export function GoogleAccountBar(): React.JSX.Element {
         <DropdownMenuItem
           onClick={() =>
             openDriveFolderPicker({
-              onSelect: async (folder) => {
-                await setRootFolder(folder);
-                toast.add({ title: `Backup folder set to "${folder.path}"`, type: 'success' });
+              onSelect: (folder) => {
+                setRootFolder(folder, {
+                  onSuccess: () => toast.add({ title: `Backup folder set to "${folder.path}"`, type: 'success' }),
+                });
               },
             })
           }

@@ -1,8 +1,8 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-import { backupVersionsMutations } from './mutations';
-import { backupVersionsQueries } from './queries';
-import type { UseBackupVersionsResult } from './types';
+import { backupVersionsMutations } from '../mutations';
+import { backupVersionsQueries } from '../queries';
+import type { UseBackupVersionsResult } from '../types';
 
 export function useBackupVersions(gameId: string, enabled: boolean): UseBackupVersionsResult {
   const { data: versions = [], isLoading, error } = useQuery(backupVersionsQueries.byGame(gameId, enabled));
@@ -13,7 +13,7 @@ export function useBackupVersions(gameId: string, enabled: boolean): UseBackupVe
     versions,
     isLoading,
     error,
-    deleteVersion: (versionId) => deleteMutation.mutateAsync(versionId),
+    deleteVersion: deleteMutation.mutate,
     isDeleting: deleteMutation.isPending,
   };
 }

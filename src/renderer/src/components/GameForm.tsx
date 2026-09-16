@@ -20,7 +20,7 @@ const gameFormSchema = z.object({
 
 const EMPTY_VALUES: GameFormValues = { name: '', localPath: '', driveFolderId: null, driveFolderPath: null };
 
-export function GameForm({ defaultValues, isConnected, rootFolderId, rootFolderPath, onSubmit, onCancel }: GameFormProps): React.JSX.Element {
+export function GameForm({ defaultValues, isConnected, isPending, rootFolderId, rootFolderPath, onSubmit, onCancel }: GameFormProps): React.JSX.Element {
   const openDriveFolderPicker = useDialogStore((state) => state.openDriveFolderPicker);
 
   const {
@@ -38,8 +38,8 @@ export function GameForm({ defaultValues, isConnected, rootFolderId, rootFolderP
     if (picked) onChange(picked);
   };
 
-  const submit = handleSubmit(async (values) => {
-    await onSubmit(values);
+  const submit = handleSubmit((values) => {
+    onSubmit(values);
   });
 
   return (
@@ -127,7 +127,7 @@ export function GameForm({ defaultValues, isConnected, rootFolderId, rootFolderP
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="submit" disabled={isSubmitting}>
+        <Button type="submit" disabled={isSubmitting || isPending}>
           Save
         </Button>
       </DialogFooter>
