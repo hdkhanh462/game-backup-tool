@@ -1,5 +1,6 @@
-import { useSettings } from '@renderer/hooks/useSettings';
 import { useEffect } from 'react';
+
+import { useSettings } from './useSettings';
 
 export function useTheme(): void {
   const { settings } = useSettings();

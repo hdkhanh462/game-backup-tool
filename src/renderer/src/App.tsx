@@ -7,11 +7,11 @@ import { RestoreConfirmDialog } from '@renderer/components/RestoreConfirmDialog'
 import { SettingsDialog } from '@renderer/components/SettingsDialog';
 import { Button } from '@renderer/components/ui/button';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@renderer/components/ui/empty';
-import { useGames } from '@renderer/hooks/useGames';
-import { useTheme } from '@renderer/hooks/useTheme';
-import { api } from '@renderer/lib/api';
+import { backupApi } from '@renderer/features/backup/api';
+import { useOperationStore } from '@renderer/features/backup/operationStore';
+import { useGames } from '@renderer/features/games/useGames';
+import { useTheme } from '@renderer/features/settings/useTheme';
 import { useDialogStore } from '@renderer/store/useDialogStore';
-import { useOperationStore } from '@renderer/store/useOperationStore';
 import { PlusIcon, SettingsIcon } from 'lucide-react';
 import { useEffect } from 'react';
 
@@ -23,7 +23,7 @@ function App(): React.JSX.Element {
   const setOperation = useOperationStore((state) => state.setOperation);
 
   useEffect(() => {
-    api.backup.getActiveOperations().then((operations) => {
+    backupApi.getActiveOperations().then((operations) => {
       for (const progress of operations) {
         setOperation(progress.gameId, { type: progress.op, progress });
       }

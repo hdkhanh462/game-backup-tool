@@ -3,24 +3,23 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@renderer/components/ui/input';
 import { Spinner } from '@renderer/components/ui/spinner';
 import { toast } from '@renderer/components/ui/toast';
-import { api } from '@renderer/lib/api';
+import { driveMutations } from '@renderer/features/drive/mutations';
+import { driveQueries } from '@renderer/features/drive/queries';
+import type { DriveFolderCrumb } from '@renderer/features/drive/types';
 import { useDialogStore } from '@renderer/store/useDialogStore';
-import type { DriveFolderCrumb } from '@renderer/types/drive-folder-picker.type';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { ChevronRightIcon, FolderIcon, FolderPlusIcon, HomeIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export function DriveFolderPickerDialog(): React.JSX.Element {
   const request = useDialogStore((state) => state.driveFolderPicker);
   const closeDriveFolderPicker = useDialogStore((state) => state.closeDriveFolderPicker);
-  const queryClient = useQueryClient();
 
   const startParentId = request?.startParentId ?? 'root';
   const startPath = request?.startPath ?? 'My Drive';
 
   const [breadcrumbs, setBreadcrumbs] = useState<DriveFolderCrumb[]>([{ id: startParentId, name: startPath }]);
   const [newFolderName, setNewFolderName] = useState('');
-  const [creating, setCreating] = useState(false);
 
   const open = request !== null;
   const currentFolder = breadcrumbs[breadcrumbs.length - 1];
@@ -29,11 +28,8 @@ export function DriveFolderPickerDialog(): React.JSX.Element {
     if (open) setBreadcrumbs([{ id: startParentId, name: startPath }]);
   }, [open, startParentId, startPath]);
 
-  const { data: folders = [], isLoading } = useQuery({
-    queryKey: ['drive', 'folders', currentFolder.id],
-    queryFn: () => api.drive.listFolders(currentFolder.id).then((res) => res.folders),
-    enabled: open,
-  });
+  const { data: folders = [], isLoading } = useQuery(driveQueries.folders(currentFolder.id, open));
+  const createFolderMutation = useMutation(driveMutations.createFolder(currentFolder.id));
 
   const openFolder = (folder: DriveFolderCrumb): void => {
     setBreadcrumbs((prev) => [...prev, folder]);
@@ -44,16 +40,13 @@ export function DriveFolderPickerDialog(): React.JSX.Element {
   };
 
   const handleCreateFolder = async (): Promise<void> => {
-    if (!newFolderName.trim()) return;
-    setCreating(true);
+    const name = newFolderName.trim();
+    if (!name) return;
     try {
-      await api.drive.createFolder(newFolderName.trim(), currentFolder.id);
+      await createFolderMutation.mutateAsync(name);
       setNewFolderName('');
-      await queryClient.invalidateQueries({ queryKey: ['drive', 'folders', currentFolder.id] });
     } catch (error) {
       toast.add({ title: 'Failed to create folder', description: String(error), type: 'error' });
-    } finally {
-      setCreating(false);
     }
   };
 
@@ -102,7 +95,7 @@ export function DriveFolderPickerDialog(): React.JSX.Element {
 
         <div className="flex gap-2">
           <Input placeholder="New folder name" value={newFolderName} onChange={(e) => setNewFolderName(e.target.value)} />
-          <Button variant="outline" disabled={creating || !newFolderName.trim()} onClick={handleCreateFolder}>
+          <Button variant="outline" disabled={createFolderMutation.isPending || !newFolderName.trim()} onClick={handleCreateFolder}>
             <FolderPlusIcon data-icon="inline-start" />
             Create
           </Button>

@@ -1,5 +1,6 @@
-import type { OperationStoreState } from '@renderer/types/operation-store.type';
 import { create } from 'zustand';
+
+import type { OperationStoreState } from './types';
 
 export const useOperationStore = create<OperationStoreState>((set) => ({
   operations: {},

@@ -3,13 +3,14 @@ import { Button } from '@renderer/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@renderer/components/ui/card';
 import { Progress } from '@renderer/components/ui/progress';
 import { toast } from '@renderer/components/ui/toast';
-import { useBackup } from '@renderer/hooks/useBackup';
-import { useGames } from '@renderer/hooks/useGames';
-import { useSettings } from '@renderer/hooks/useSettings';
+import { backupApi } from '@renderer/features/backup/api';
+import { useBackup } from '@renderer/features/backup/useBackup';
+import type { GameCardProps } from '@renderer/features/games/types';
+import { useGames } from '@renderer/features/games/useGames';
+import { useSettings } from '@renderer/features/settings/useSettings';
 import { api } from '@renderer/lib/api';
 import { formatBytes } from '@renderer/lib/format';
 import { useDialogStore } from '@renderer/store/useDialogStore';
-import type { GameCardProps } from '@renderer/types/game-card.type';
 import type { Game } from '@shared/types';
 import { FolderOpenIcon, HistoryIcon, PencilIcon, TrashIcon, UploadIcon } from 'lucide-react';
 
@@ -47,7 +48,7 @@ export function GameCard({ game }: GameCardProps): React.JSX.Element {
   };
 
   const handleRestoreClick = async (): Promise<void> => {
-    const versions = await api.backup.listVersions(game.id);
+    const versions = await backupApi.listVersions(game.id);
     if (versions.length === 0) {
       toast.add({ title: 'No backups yet', type: 'info' });
       return;

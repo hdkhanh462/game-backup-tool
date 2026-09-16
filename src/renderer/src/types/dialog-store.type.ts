@@ -1,6 +1,5 @@
+import type { DriveFolderPickerRequest } from '@renderer/features/drive/types';
 import type { BackupVersion, Game } from '@shared/types';
-
-import type { DriveFolderPickerRequest } from './drive-folder-picker.type';
 
 export interface DialogState {
   gameDialog: { open: boolean; game: Game | null };

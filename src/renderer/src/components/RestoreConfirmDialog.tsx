@@ -4,8 +4,8 @@ import { Field, FieldContent, FieldLabel } from '@renderer/components/ui/field';
 import { Spinner } from '@renderer/components/ui/spinner';
 import { Switch } from '@renderer/components/ui/switch';
 import { toast } from '@renderer/components/ui/toast';
-import { useBackup } from '@renderer/hooks/useBackup';
-import { useSettings } from '@renderer/hooks/useSettings';
+import { useBackup } from '@renderer/features/backup/useBackup';
+import { useSettings } from '@renderer/features/settings/useSettings';
 import { useDialogStore } from '@renderer/store/useDialogStore';
 import { useEffect, useState } from 'react';
 

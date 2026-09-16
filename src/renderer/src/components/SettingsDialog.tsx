@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Field, FieldContent, FieldGroup, FieldLabel } from '@renderer/components/ui/field';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@renderer/components/ui/select';
 import { Switch } from '@renderer/components/ui/switch';
-import { useSettings } from '@renderer/hooks/useSettings';
+import { useSettings } from '@renderer/features/settings/useSettings';
 import { useDialogStore } from '@renderer/store/useDialogStore';
 import type { AppSettings } from '@shared/types';
 import { Controller, useForm } from 'react-hook-form';

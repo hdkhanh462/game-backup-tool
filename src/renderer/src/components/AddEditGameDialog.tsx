@@ -1,10 +1,10 @@
 import { GameForm } from '@renderer/components/GameForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@renderer/components/ui/dialog';
 import { toast } from '@renderer/components/ui/toast';
-import { useAuthStatus } from '@renderer/hooks/useAuthStatus';
-import { useGames } from '@renderer/hooks/useGames';
+import { useAuthStatus } from '@renderer/features/auth/useAuthStatus';
+import type { GameFormValues } from '@renderer/features/games/types';
+import { useGames } from '@renderer/features/games/useGames';
 import { useDialogStore } from '@renderer/store/useDialogStore';
-import type { GameFormValues } from '@renderer/types/game-form.type';
 
 export function AddEditGameDialog(): React.JSX.Element {
   const { open, game } = useDialogStore((state) => state.gameDialog);
