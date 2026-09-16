@@ -17,7 +17,7 @@ export function ImportGamesDialog(): React.JSX.Element {
   const { open } = useDialogStore((state) => state.importGamesDialog);
   const closeImportGamesDialog = useDialogStore((state) => state.closeImportGamesDialog);
   const { status } = useAuthStatus();
-  const { addGame, isAdding } = useGames();
+  const { importGame, isImporting } = useGames();
 
   const [localPaths, setLocalPaths] = useState<Record<string, string>>({});
   const [importingId, setImportingId] = useState<string | null>(null);
@@ -40,7 +40,7 @@ export function ImportGamesDialog(): React.JSX.Element {
     const localPath = localPaths[candidate.id];
     if (!localPath) return;
     setImportingId(candidate.id);
-    addGame(
+    importGame(
       { name: candidate.name, localPath, driveFolderId: candidate.id, driveFolderPath: candidate.path },
       {
         onSuccess: () => {
@@ -90,7 +90,7 @@ export function ImportGamesDialog(): React.JSX.Element {
                     <FolderIcon data-icon="inline-start" />
                     Browse
                   </Button>
-                  <Button type="button" size="sm" disabled={!localPaths[candidate.id] || (isAdding && importingId === candidate.id)} onClick={() => handleImport(candidate)}>
+                  <Button type="button" size="sm" disabled={!localPaths[candidate.id] || (isImporting && importingId === candidate.id)} onClick={() => handleImport(candidate)}>
                     Import
                   </Button>
                 </div>

@@ -100,7 +100,7 @@ export function GameCard({ game }: GameCardProps): React.JSX.Element {
           <UploadIcon data-icon="inline-start" />
           Backup
         </Button>
-        <Button size="sm" variant="outline" disabled={isBusy || game.lastBackupStatus === 'never'} onClick={handleRestoreClick}>
+        <Button size="sm" variant="outline" disabled={isBusy} onClick={handleRestoreClick}>
           Restore
         </Button>
         <Button size="sm" variant="outline" disabled={isBusy} onClick={() => openBackupHistoryDialog(game)}>

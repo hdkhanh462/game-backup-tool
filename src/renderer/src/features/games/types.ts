@@ -31,8 +31,10 @@ export interface UseGamesResult {
   games: Game[];
   isLoading: boolean;
   addGame: UseMutateFunction<Game, Error, GameInput>;
+  importGame: UseMutateFunction<Game, Error, GameInput>;
   updateGame: UseMutateFunction<Game, Error, UpdateGameInput>;
   removeGame: UseMutateFunction<void, Error, string>;
   isAdding: boolean;
+  isImporting: boolean;
   isUpdating: boolean;
 }

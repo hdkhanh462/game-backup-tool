@@ -6,6 +6,7 @@ export function createGamesApi() {
   return {
     list: (): Promise<Game[]> => ipcRenderer.invoke('games:list'),
     listImportCandidates: (): Promise<DriveGameCandidate[]> => ipcRenderer.invoke('games:listImportCandidates'),
+    import: (input: GameInput): Promise<Game> => ipcRenderer.invoke('games:import', input),
     add: (input: GameInput): Promise<Game> => ipcRenderer.invoke('games:add', input),
     update: (id: string, patch: Partial<GameInput>): Promise<Game> => ipcRenderer.invoke('games:update', id, patch),
     remove: (id: string): Promise<void> => ipcRenderer.invoke('games:remove', id),

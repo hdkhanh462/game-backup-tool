@@ -7,6 +7,7 @@ import type { UseGamesResult } from '../types';
 export function useGames(): UseGamesResult {
   const { data: games = [], isLoading } = useQuery(gamesQueries.list());
   const addMutation = useMutation(gamesMutations.add());
+  const importMutation = useMutation(gamesMutations.import());
   const updateMutation = useMutation(gamesMutations.update());
   const removeMutation = useMutation(gamesMutations.remove());
 
@@ -14,9 +15,11 @@ export function useGames(): UseGamesResult {
     games,
     isLoading,
     addGame: addMutation.mutate,
+    importGame: importMutation.mutate,
     updateGame: updateMutation.mutate,
     removeGame: removeMutation.mutate,
     isAdding: addMutation.isPending,
+    isImporting: importMutation.isPending,
     isUpdating: updateMutation.isPending,
   };
 }

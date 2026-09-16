@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto';
 
 import type { DriveGameCandidate, Game, GameInput } from '../shared/types';
 import * as auth from './auth';
+import * as backup from './backup';
 import * as drive from './drive';
 import { getStore } from './store';
 
@@ -52,6 +53,21 @@ export async function remove(id: string): Promise<void> {
   const store = await getStore();
   const games = store.get('games').filter((g) => g.id !== id);
   store.set('games', games);
+}
+
+export async function importGame(input: GameInput): Promise<Game> {
+  const created = await add(input);
+  if (!created.driveFolderId) return created;
+
+  try {
+    const versions = await backup.listVersions(created.driveFolderId);
+    if (versions.length > 0) {
+      return await recordBackupResult(created.id, { lastBackupAt: versions[0].createdAt, lastBackupStatus: 'success' });
+    }
+  } catch {
+    // best-effort; keep the freshly created game as 'never' if Drive lookup fails
+  }
+  return created;
 }
 
 export async function listImportCandidates(): Promise<DriveGameCandidate[]> {

@@ -14,6 +14,13 @@ export const gamesMutations = {
       queryClient.invalidateQueries({ queryKey: gamesKeys.importCandidates });
     },
   }),
+  import: (): UseMutationOptions<Game, Error, GameInput> => ({
+    mutationFn: (input) => gamesApi.import(input),
+    onSuccess: (game) => {
+      queryClient.setQueryData<Game[]>(gamesKeys.all, (prev) => [...(prev ?? []), game]);
+      queryClient.invalidateQueries({ queryKey: gamesKeys.importCandidates });
+    },
+  }),
   update: (): UseMutationOptions<Game, Error, UpdateGameInput> => ({
     mutationFn: ({ id, patch }) => gamesApi.update(id, patch),
     onSuccess: (updated) => {

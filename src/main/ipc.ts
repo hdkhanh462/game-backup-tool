@@ -21,6 +21,7 @@ export function registerIpcHandlers(): void {
 
   ipcMain.handle('games:list', () => games.list());
   ipcMain.handle('games:listImportCandidates', () => games.listImportCandidates());
+  ipcMain.handle('games:import', (_event, input: GameInput) => games.importGame(input));
   ipcMain.handle('games:add', (_event, input: GameInput) => games.add(input));
   ipcMain.handle('games:update', (_event, id: string, patch: Partial<GameInput>) => games.update(id, patch));
   ipcMain.handle('games:remove', (_event, id: string) => games.remove(id));
