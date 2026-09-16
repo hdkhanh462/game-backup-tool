@@ -22,4 +22,8 @@ export const useDialogStore = create<DialogState>((set) => ({
   settingsDialog: { open: false },
   openSettingsDialog: () => set({ settingsDialog: { open: true } }),
   closeSettingsDialog: () => set({ settingsDialog: { open: false } }),
+
+  importGamesDialog: { open: false },
+  openImportGamesDialog: () => set({ importGamesDialog: { open: true } }),
+  closeImportGamesDialog: () => set({ importGamesDialog: { open: false } }),
 }));

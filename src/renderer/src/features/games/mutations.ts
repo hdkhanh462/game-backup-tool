@@ -11,6 +11,7 @@ export const gamesMutations = {
     mutationFn: (input) => gamesApi.add(input),
     onSuccess: (game) => {
       queryClient.setQueryData<Game[]>(gamesKeys.all, (prev) => [...(prev ?? []), game]);
+      queryClient.invalidateQueries({ queryKey: gamesKeys.importCandidates });
     },
   }),
   update: (): UseMutationOptions<Game, Error, UpdateGameInput> => ({

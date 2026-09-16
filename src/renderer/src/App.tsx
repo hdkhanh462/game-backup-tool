@@ -3,23 +3,27 @@ import { BackupHistoryDialog } from '@renderer/components/BackupHistoryDialog';
 import { DriveFolderPickerDialog } from '@renderer/components/DriveFolderPickerDialog';
 import { GameCard } from '@renderer/components/GameCard';
 import { GoogleAccountBar } from '@renderer/components/GoogleAccountBar';
+import { ImportGamesDialog } from '@renderer/components/ImportGamesDialog';
 import { RestoreConfirmDialog } from '@renderer/components/RestoreConfirmDialog';
 import { SettingsDialog } from '@renderer/components/SettingsDialog';
 import { Button } from '@renderer/components/ui/button';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@renderer/components/ui/empty';
+import { useAuthStatus } from '@renderer/features/auth/hooks/useAuthStatus';
 import { backupApi } from '@renderer/features/backup/api';
 import { useOperationStore } from '@renderer/features/backup/operationStore';
 import { useGames } from '@renderer/features/games/hooks/useGames';
 import { useTheme } from '@renderer/features/settings/hooks/useTheme';
 import { useDialogStore } from '@renderer/store/useDialogStore';
-import { PlusIcon, SettingsIcon } from 'lucide-react';
+import { CloudDownloadIcon, PlusIcon, SettingsIcon } from 'lucide-react';
 import { useEffect } from 'react';
 
 function App(): React.JSX.Element {
   useTheme();
   const { games } = useGames();
+  const { status } = useAuthStatus();
   const openAddGameDialog = useDialogStore((state) => state.openAddGameDialog);
   const openSettingsDialog = useDialogStore((state) => state.openSettingsDialog);
+  const openImportGamesDialog = useDialogStore((state) => state.openImportGamesDialog);
   const setOperation = useOperationStore((state) => state.setOperation);
 
   useEffect(() => {
@@ -36,6 +40,12 @@ function App(): React.JSX.Element {
         <h1 className="text-xl font-semibold">GameSave Backup</h1>
         <div className="flex items-center gap-2">
           <GoogleAccountBar />
+          {status.state === 'connected' && (
+            <Button variant="outline" onClick={() => openImportGamesDialog()}>
+              <CloudDownloadIcon data-icon="inline-start" />
+              Import from Drive
+            </Button>
+          )}
           <Button size="icon" variant="ghost" onClick={() => openSettingsDialog()}>
             <SettingsIcon />
           </Button>
@@ -52,10 +62,18 @@ function App(): React.JSX.Element {
             <EmptyDescription>Add a game to start managing its save backups.</EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            <Button onClick={() => openAddGameDialog()}>
-              <PlusIcon data-icon="inline-start" />
-              Add Game
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={() => openAddGameDialog()}>
+                <PlusIcon data-icon="inline-start" />
+                Add Game
+              </Button>
+              {status.state === 'connected' && (
+                <Button variant="outline" onClick={() => openImportGamesDialog()}>
+                  <CloudDownloadIcon data-icon="inline-start" />
+                  Import from Drive
+                </Button>
+              )}
+            </div>
           </EmptyContent>
         </Empty>
       ) : (
@@ -77,6 +95,7 @@ function App(): React.JSX.Element {
       <BackupHistoryDialog />
       <RestoreConfirmDialog />
       <SettingsDialog />
+      <ImportGamesDialog />
     </div>
   );
 }

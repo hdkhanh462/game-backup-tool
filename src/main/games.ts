@@ -1,6 +1,8 @@
 import { randomUUID } from 'crypto';
 
-import type { Game, GameInput } from '../shared/types';
+import type { DriveGameCandidate, Game, GameInput } from '../shared/types';
+import * as auth from './auth';
+import * as drive from './drive';
 import { getStore } from './store';
 
 export async function list(): Promise<Game[]> {
@@ -50,6 +52,23 @@ export async function remove(id: string): Promise<void> {
   const store = await getStore();
   const games = store.get('games').filter((g) => g.id !== id);
   store.set('games', games);
+}
+
+export async function listImportCandidates(): Promise<DriveGameCandidate[]> {
+  const status = auth.getStatus();
+  if (status.state !== 'connected' || !status.rootFolderId) return [];
+
+  const store = await getStore();
+  const claimedIds = new Set(
+    store
+      .get('games')
+      .map((g) => g.driveFolderId)
+      .filter((id): id is string => id !== null),
+  );
+
+  const rootPath = status.rootFolderPath ?? 'My Drive';
+  const { folders } = await drive.listFolders(status.rootFolderId);
+  return folders.filter((folder) => !claimedIds.has(folder.id)).map((folder) => ({ id: folder.id, name: folder.name, path: `${rootPath}/${folder.name}` }));
 }
 
 export async function recordBackupResult(id: string, result: { lastBackupAt: string | null; lastBackupStatus: Game['lastBackupStatus'] }): Promise<Game> {

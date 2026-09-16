@@ -22,4 +22,8 @@ export interface DialogState {
   settingsDialog: { open: boolean };
   openSettingsDialog: () => void;
   closeSettingsDialog: () => void;
+
+  importGamesDialog: { open: boolean };
+  openImportGamesDialog: () => void;
+  closeImportGamesDialog: () => void;
 }

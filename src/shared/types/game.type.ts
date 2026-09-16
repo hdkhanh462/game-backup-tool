@@ -11,3 +11,9 @@ export interface Game {
 }
 
 export type GameInput = Pick<Game, 'name' | 'localPath' | 'driveFolderId' | 'driveFolderPath'>;
+
+export interface DriveGameCandidate {
+  id: string;
+  name: string;
+  path: string;
+}
