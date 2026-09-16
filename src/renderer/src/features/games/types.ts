@@ -22,11 +22,16 @@ export interface GameFormProps {
   onCancel: () => void;
 }
 
+export interface UpdateGameInput {
+  id: string;
+  patch: Partial<GameInput>;
+}
+
 export interface UseGamesResult {
   games: Game[];
   isLoading: boolean;
   addGame: UseMutateFunction<Game, Error, GameInput>;
-  updateGame: UseMutateFunction<Game, Error, { id: string; patch: Partial<GameInput> }>;
+  updateGame: UseMutateFunction<Game, Error, UpdateGameInput>;
   removeGame: UseMutateFunction<void, Error, string>;
   isAdding: boolean;
   isUpdating: boolean;

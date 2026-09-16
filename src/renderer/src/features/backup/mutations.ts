@@ -1,9 +1,10 @@
 import { gamesKeys } from '@renderer/features/games/queries';
-import type { BackupRunResult, RestoreOptions } from '@shared/types';
+import type { BackupRunResult } from '@shared/types';
 import type { UseMutationOptions } from '@tanstack/react-query';
 
 import { backupApi, restoreApi } from './api';
 import { backupVersionsKeys } from './queries';
+import type { RestoreVersionInput } from './types';
 
 export const backupMutations = {
   run: (gameId: string): UseMutationOptions<BackupRunResult, Error, void> => ({
@@ -13,7 +14,7 @@ export const backupMutations = {
 };
 
 export const restoreMutations = {
-  run: (gameId: string): UseMutationOptions<void, Error, { versionId: string; options: RestoreOptions }> => ({
+  run: (gameId: string): UseMutationOptions<void, Error, RestoreVersionInput> => ({
     mutationFn: ({ versionId, options }) => restoreApi.run(gameId, versionId, options),
     meta: { invalidateQueries: gamesKeys.all },
   }),

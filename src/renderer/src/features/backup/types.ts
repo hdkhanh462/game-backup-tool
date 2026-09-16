@@ -16,6 +16,11 @@ export interface MutationCallbacks<TData> {
   onError?: (error: Error) => void;
 }
 
+export interface RestoreVersionInput {
+  versionId: string;
+  options: RestoreOptions;
+}
+
 export interface UseBackupResult {
   operation: OperationState | null;
   isBusy: boolean;

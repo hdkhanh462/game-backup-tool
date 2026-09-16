@@ -4,6 +4,7 @@ import type { UseMutationOptions } from '@tanstack/react-query';
 
 import { gamesApi } from './api';
 import { gamesKeys } from './queries';
+import type { UpdateGameInput } from './types';
 
 export const gamesMutations = {
   add: (): UseMutationOptions<Game, Error, GameInput> => ({
@@ -12,7 +13,7 @@ export const gamesMutations = {
       queryClient.setQueryData<Game[]>(gamesKeys.all, (prev) => [...(prev ?? []), game]);
     },
   }),
-  update: (): UseMutationOptions<Game, Error, { id: string; patch: Partial<GameInput> }> => ({
+  update: (): UseMutationOptions<Game, Error, UpdateGameInput> => ({
     mutationFn: ({ id, patch }) => gamesApi.update(id, patch),
     onSuccess: (updated) => {
       queryClient.setQueryData<Game[]>(gamesKeys.all, (prev) => (prev ?? []).map((g) => (g.id === updated.id ? updated : g)));

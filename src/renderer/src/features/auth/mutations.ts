@@ -1,4 +1,5 @@
 import { toast } from '@renderer/components/ui/toast';
+import type { DriveFolderSelection } from '@renderer/features/drive/types';
 import { queryClient } from '@renderer/lib/queryClient';
 import type { AuthStatus } from '@shared/types';
 import type { UseMutationOptions } from '@tanstack/react-query';
@@ -29,7 +30,7 @@ export const authMutations = {
       toast.add({ title: 'Disconnected from Google Drive', type: 'info' });
     },
   }),
-  setRootFolder: (): UseMutationOptions<AuthStatus, Error, { id: string; path: string }> => ({
+  setRootFolder: (): UseMutationOptions<AuthStatus, Error, DriveFolderSelection> => ({
     mutationFn: (folder) => authApi.setRootFolder(folder),
     onSuccess: (next) => {
       queryClient.setQueryData(authKeys.status, next);
