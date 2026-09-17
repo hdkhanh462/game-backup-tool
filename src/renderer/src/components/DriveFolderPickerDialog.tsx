@@ -10,8 +10,10 @@ import { useDialogStore } from '@renderer/store/useDialogStore';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { ChevronRightIcon, FolderIcon, FolderPlusIcon, HomeIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export function DriveFolderPickerDialog(): React.JSX.Element {
+  const { t } = useTranslation(['common', 'drive']);
   const request = useDialogStore((state) => state.driveFolderPicker);
   const closeDriveFolderPicker = useDialogStore((state) => state.closeDriveFolderPicker);
 
@@ -55,7 +57,7 @@ export function DriveFolderPickerDialog(): React.JSX.Element {
     if (!name) return;
     createFolderMutation.mutate(name, {
       onSuccess: () => setNewFolderName(''),
-      onError: (error) => toast.add({ title: 'Failed to create folder', description: String(error), type: 'error' }),
+      onError: (error) => toast.add({ title: t('drive:picker.createFailedToast'), description: String(error), type: 'error' }),
     });
   };
 
@@ -70,8 +72,8 @@ export function DriveFolderPickerDialog(): React.JSX.Element {
     <Dialog open={open} onOpenChange={(next) => !next && closeDriveFolderPicker()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Choose a Drive folder</DialogTitle>
-          <DialogDescription>Browse or create a folder in your Google Drive.</DialogDescription>
+          <DialogTitle>{t('drive:picker.title')}</DialogTitle>
+          <DialogDescription>{t('drive:picker.description')}</DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-wrap items-center gap-1 text-sm text-muted-foreground">
@@ -84,7 +86,7 @@ export function DriveFolderPickerDialog(): React.JSX.Element {
             </span>
           ))}
         </div>
-        {request?.currentFolderPath && <p className="truncate text-xs text-muted-foreground">Currently selected: {request.currentFolderPath}</p>}
+        {request?.currentFolderPath && <p className="truncate text-xs text-muted-foreground">{t('drive:picker.currentlySelected', { path: request.currentFolderPath })}</p>}
 
         <div className="flex max-h-64 flex-col gap-1 overflow-y-auto rounded-md border p-2">
           {isLoading ? (
@@ -92,7 +94,7 @@ export function DriveFolderPickerDialog(): React.JSX.Element {
               <Spinner />
             </div>
           ) : folders.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">No folders here yet.</p>
+            <p className="py-8 text-center text-sm text-muted-foreground">{t('drive:picker.emptyFolder')}</p>
           ) : (
             folders.map((folder) => (
               <button key={folder.id} type="button" className="flex items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-muted" onClick={() => openFolder(folder)}>
@@ -104,18 +106,18 @@ export function DriveFolderPickerDialog(): React.JSX.Element {
         </div>
 
         <div className="flex gap-2">
-          <Input placeholder="New folder name" value={newFolderName} onChange={(e) => setNewFolderName(e.target.value)} />
+          <Input placeholder={t('drive:picker.newFolderPlaceholder')} value={newFolderName} onChange={(e) => setNewFolderName(e.target.value)} />
           <Button variant="outline" disabled={createFolderMutation.isPending || !newFolderName.trim()} onClick={handleCreateFolder}>
             <FolderPlusIcon data-icon="inline-start" />
-            Create
+            {t('actions.create')}
           </Button>
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => closeDriveFolderPicker()}>
-            Cancel
+            {t('actions.cancel')}
           </Button>
-          <Button onClick={handleSelect}>Select This Folder</Button>
+          <Button onClick={handleSelect}>{t('actions.selectThisFolder')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

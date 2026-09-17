@@ -1,4 +1,5 @@
 import './assets/main.css';
+import '@renderer/lib/i18n';
 
 import { Toaster } from '@renderer/components/ui/toast';
 import { TooltipProvider } from '@renderer/components/ui/tooltip';

@@ -1,0 +1,39 @@
+{
+  "appTitle": "GameSave Backup",
+  "actions": {
+    "add": "Add",
+    "addGame": "Add Game",
+    "editGame": "Edit Game",
+    "save": "Save",
+    "cancel": "Cancel",
+    "browse": "Browse",
+    "choose": "Choose",
+    "create": "Create",
+    "remove": "Remove",
+    "edit": "Edit",
+    "backup": "Backup",
+    "restore": "Restore",
+    "history": "History",
+    "import": "Import",
+    "importFromDrive": "Import from Drive",
+    "openSaveFolder": "Open Save Folder",
+    "signOut": "Sign out",
+    "settings": "Settings",
+    "changeBackupFolder": "Change backup folder",
+    "connectGoogleDrive": "Connect Google Drive",
+    "connecting": "Connecting…",
+    "selectThisFolder": "Select This Folder",
+    "moreActions": "More actions"
+  },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "vi": "Tiếng Việt"
+  }
+}

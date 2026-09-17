@@ -1,0 +1,15 @@
+{
+  "title": "Cài đặt",
+  "backup": {
+    "sectionTitle": "Sao lưu",
+    "incremental": "Sao lưu tăng dần"
+  },
+  "restore": {
+    "sectionTitle": "Khôi phục",
+    "confirmOverwrite": "Xác nhận trước khi ghi đè save",
+    "safetyBackupDefault": "Sao lưu save hiện tại trước khi khôi phục"
+  },
+  "general": {
+    "sectionTitle": "Chung"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "appTitle": "GameSave Backup",
+  "actions": {
+    "add": "Thêm",
+    "addGame": "Thêm game",
+    "editGame": "Sửa game",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "browse": "Duyệt",
+    "choose": "Chọn",
+    "create": "Tạo",
+    "remove": "Xóa",
+    "edit": "Sửa",
+    "backup": "Sao lưu",
+    "restore": "Khôi phục",
+    "history": "Lịch sử",
+    "import": "Nhập",
+    "importFromDrive": "Nhập từ Drive",
+    "openSaveFolder": "Mở thư mục save",
+    "signOut": "Đăng xuất",
+    "settings": "Cài đặt",
+    "changeBackupFolder": "Đổi thư mục sao lưu",
+    "connectGoogleDrive": "Kết nối Google Drive",
+    "connecting": "Đang kết nối…",
+    "selectThisFolder": "Chọn thư mục này",
+    "moreActions": "Thao tác khác"
+  },
+  "theme": {
+    "label": "Giao diện",
+    "light": "Sáng",
+    "dark": "Tối",
+    "system": "Theo hệ thống"
+  },
+  "language": {
+    "label": "Ngôn ngữ",
+    "en": "English",
+    "vi": "Tiếng Việt"
+  }
+}

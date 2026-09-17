@@ -1,0 +1,48 @@
+{
+  "empty": {
+    "title": "Chưa có game nào",
+    "description": "Thêm một game để bắt đầu quản lý sao lưu."
+  },
+  "card": {
+    "statusBackedUp": "Đã sao lưu",
+    "statusFailed": "Sao lưu thất bại",
+    "statusNever": "Chưa từng sao lưu",
+    "local": "Local: {{path}}",
+    "drive": "Drive: {{path}}",
+    "driveNotSet": "Chưa chọn",
+    "phaseBackingUpCurrent": "Đang sao lưu save hiện tại",
+    "phaseRestoring": "Đang khôi phục",
+    "phaseBackingUp": "Đang sao lưu",
+    "progressSummary": "{{filesDone}}/{{filesTotal}} tệp, {{bytesDone}}/{{bytesTotal}}",
+    "noBackupsYet": "Chưa có bản sao lưu nào",
+    "backedUpToast": "Đã sao lưu {{name}}",
+    "backupFailedToast": "Sao lưu thất bại",
+    "restoredToast": "Đã khôi phục {{name}}",
+    "restoreFailedToast": "Khôi phục thất bại",
+    "removedToast": "Đã xóa {{name}}",
+    "removeFailedToast": "Xóa game thất bại"
+  },
+  "form": {
+    "nameLabel": "Tên",
+    "namePlaceholder": "Cyberpunk 2077",
+    "nameRequired": "Vui lòng nhập tên.",
+    "localPathLabel": "Thư mục save trên máy",
+    "localPathRequired": "Chọn thư mục save trên máy.",
+    "localPathPlaceholder": "Chưa chọn",
+    "driveSubfolderLabel": "Thư mục con trên Drive",
+    "connectDriveFirst": "Kết nối Google Drive trước",
+    "addedToast": "Đã thêm {{name}}",
+    "updatedToast": "Đã cập nhật {{name}}",
+    "addFailedToast": "Thêm game thất bại",
+    "updateFailedToast": "Cập nhật game thất bại"
+  },
+  "import": {
+    "title": "Nhập game từ Drive",
+    "description": "Các game đã sao lưu từ thiết bị khác sẽ hiện ở đây. Chọn thư mục save trên máy để liên kết từng game trên thiết bị này.",
+    "connectFirst": "Kết nối Google Drive trước.",
+    "emptyTitle": "Không có gì để nhập",
+    "emptyDescription": "Mọi thư mục sao lưu trên Drive đều đã được liên kết với một game ở đây.",
+    "importedToast": "Đã nhập {{name}}",
+    "importFailedToast": "Nhập game thất bại"
+  }
+}

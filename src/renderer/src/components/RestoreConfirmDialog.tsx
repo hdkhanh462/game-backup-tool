@@ -8,8 +8,10 @@ import { useBackup } from '@renderer/features/backup/hooks/useBackup';
 import { useSettings } from '@renderer/features/settings/hooks/useSettings';
 import { useDialogStore } from '@renderer/store/useDialogStore';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export function RestoreConfirmDialog(): React.JSX.Element {
+  const { t } = useTranslation(['common', 'backup']);
   const { open, game, version } = useDialogStore((state) => state.restoreConfirmDialog);
   const closeRestoreConfirmDialog = useDialogStore((state) => state.closeRestoreConfirmDialog);
   const { settings } = useSettings();
@@ -26,8 +28,8 @@ export function RestoreConfirmDialog(): React.JSX.Element {
       version.id,
       { safetyBackup, deleteExtraneous: true },
       {
-        onSuccess: () => toast.add({ title: `${game.name} restored to ${version.name}`, type: 'success' }),
-        onError: (error) => toast.add({ title: 'Restore failed', description: String(error), type: 'error' }),
+        onSuccess: () => toast.add({ title: t('backup:restoreConfirm.restoredToast', { name: game.name, version: version.name }), type: 'success' }),
+        onError: (error) => toast.add({ title: t('backup:restoreConfirm.restoreFailedToast'), description: String(error), type: 'error' }),
       },
     );
     closeRestoreConfirmDialog();
@@ -37,27 +39,24 @@ export function RestoreConfirmDialog(): React.JSX.Element {
     <Dialog open={open} onOpenChange={(next) => !next && closeRestoreConfirmDialog()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Restore {game?.name}?</DialogTitle>
-          <DialogDescription>
-            This will overwrite the save files in &quot;{game?.localPath}&quot; with the version from {version && new Date(version.createdAt).toLocaleString()}. Local files that are not part of this
-            backup will be removed. This cannot be undone.
-          </DialogDescription>
+          <DialogTitle>{t('backup:restoreConfirm.title', { name: game?.name })}</DialogTitle>
+          <DialogDescription>{t('backup:restoreConfirm.description', { path: game?.localPath, date: version && new Date(version.createdAt).toLocaleString() })}</DialogDescription>
         </DialogHeader>
 
         <Field orientation="horizontal">
           <FieldContent>
-            <FieldLabel htmlFor="safety-backup">Back up current save before restoring</FieldLabel>
+            <FieldLabel htmlFor="safety-backup">{t('backup:restoreConfirm.safetyBackupLabel')}</FieldLabel>
           </FieldContent>
           <Switch id="safety-backup" checked={safetyBackup} onCheckedChange={setSafetyBackup} />
         </Field>
 
         <DialogFooter>
           <Button type="button" variant="outline" onClick={() => closeRestoreConfirmDialog()}>
-            Cancel
+            {t('actions.cancel')}
           </Button>
           <Button type="button" variant="destructive" disabled={isRestorePending} onClick={handleConfirm}>
             {isRestorePending && <Spinner data-icon="inline-start" />}
-            Restore
+            {t('actions.restore')}
           </Button>
         </DialogFooter>
       </DialogContent>

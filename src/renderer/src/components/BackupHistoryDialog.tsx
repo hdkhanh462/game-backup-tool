@@ -7,8 +7,10 @@ import { useBackupVersions } from '@renderer/features/backup/hooks/useBackupVers
 import { formatBytes } from '@renderer/lib/format';
 import { useDialogStore } from '@renderer/store/useDialogStore';
 import { TrashIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export function BackupHistoryDialog(): React.JSX.Element {
+  const { t } = useTranslation(['common', 'backup']);
   const { open, game } = useDialogStore((state) => state.backupHistoryDialog);
   const closeBackupHistoryDialog = useDialogStore((state) => state.closeBackupHistoryDialog);
   const openRestoreConfirmDialog = useDialogStore((state) => state.openRestoreConfirmDialog);
@@ -17,10 +19,10 @@ export function BackupHistoryDialog(): React.JSX.Element {
   const { isBusy } = useBackup(gameId);
 
   const handleDelete = (versionId: string, name: string): void => {
-    if (!window.confirm(`Permanently delete backup version "${name}"? This cannot be undone.`)) return;
+    if (!window.confirm(t('backup:history.deleteConfirm', { name }))) return;
     deleteVersion(versionId, {
-      onSuccess: () => toast.add({ title: `Version ${name} deleted`, type: 'info' }),
-      onError: (error) => toast.add({ title: 'Failed to delete version', description: String(error), type: 'error' }),
+      onSuccess: () => toast.add({ title: t('backup:history.deletedToast', { name }), type: 'info' }),
+      onError: (error) => toast.add({ title: t('backup:history.deleteFailedToast'), description: String(error), type: 'error' }),
     });
   };
 
@@ -28,7 +30,7 @@ export function BackupHistoryDialog(): React.JSX.Element {
     <Dialog open={open} onOpenChange={(next) => !next && closeBackupHistoryDialog()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Backup history — {game?.name}</DialogTitle>
+          <DialogTitle>{t('backup:history.title', { name: game?.name })}</DialogTitle>
         </DialogHeader>
 
         {isLoading ? (
@@ -36,7 +38,7 @@ export function BackupHistoryDialog(): React.JSX.Element {
             <Spinner />
           </div>
         ) : versions.length === 0 ? (
-          <p className="py-8 text-center text-sm text-muted-foreground">No backups yet.</p>
+          <p className="py-8 text-center text-sm text-muted-foreground">{t('backup:history.empty')}</p>
         ) : (
           <ul className="flex max-h-80 flex-col gap-1 overflow-y-auto">
             {versions.map((version) => (
@@ -44,7 +46,7 @@ export function BackupHistoryDialog(): React.JSX.Element {
                 <div className="min-w-0">
                   <p className="truncate font-medium">{version.name}</p>
                   <p className="truncate text-xs text-muted-foreground">
-                    {version.device} · {version.fileCount} files · {formatBytes(version.totalBytes)}
+                    {t('backup:history.summary', { device: version.device, fileCount: version.fileCount, size: formatBytes(version.totalBytes) })}
                   </p>
                 </div>
                 <div className="flex shrink-0 gap-2">
@@ -58,7 +60,7 @@ export function BackupHistoryDialog(): React.JSX.Element {
                       openRestoreConfirmDialog(game, version);
                     }}
                   >
-                    Restore
+                    {t('actions.restore')}
                   </Button>
                   <Button size="sm" variant="ghost" disabled={isBusy} onClick={() => handleDelete(version.id, version.name)}>
                     <TrashIcon />

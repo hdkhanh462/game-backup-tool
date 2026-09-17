@@ -9,19 +9,21 @@ import { api } from '@renderer/lib/api';
 import { useDialogStore } from '@renderer/store/useDialogStore';
 import { FolderIcon } from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
-
-const gameFormSchema = z.object({
-  name: z.string().trim().min(1, 'Name is required.'),
-  localPath: z.string().trim().min(1, 'Choose the local save folder.'),
-  driveFolderId: z.string().nullable(),
-  driveFolderPath: z.string().nullable(),
-});
 
 const EMPTY_VALUES: GameFormValues = { name: '', localPath: '', driveFolderId: null, driveFolderPath: null };
 
 export function GameForm({ defaultValues, isConnected, isPending, rootFolderId, rootFolderPath, onSubmit, onCancel }: GameFormProps): React.JSX.Element {
+  const { t } = useTranslation(['common', 'games']);
   const openDriveFolderPicker = useDialogStore((state) => state.openDriveFolderPicker);
+
+  const gameFormSchema = z.object({
+    name: z.string().trim().min(1, t('games:form.nameRequired')),
+    localPath: z.string().trim().min(1, t('games:form.localPathRequired')),
+    driveFolderId: z.string().nullable(),
+    driveFolderPath: z.string().nullable(),
+  });
 
   const {
     control,
@@ -51,9 +53,9 @@ export function GameForm({ defaultValues, isConnected, isPending, rootFolderId, 
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={!!fieldState.error || undefined}>
-              <FieldLabel htmlFor="game-name">Name</FieldLabel>
+              <FieldLabel htmlFor="game-name">{t('games:form.nameLabel')}</FieldLabel>
               <FieldContent>
-                <Input id="game-name" aria-invalid={!!fieldState.error || undefined} placeholder="Cyberpunk 2077" {...field} />
+                <Input id="game-name" aria-invalid={!!fieldState.error || undefined} placeholder={t('games:form.namePlaceholder')} {...field} />
                 {fieldState.error && <FieldError>{fieldState.error.message}</FieldError>}
               </FieldContent>
             </Field>
@@ -65,12 +67,12 @@ export function GameForm({ defaultValues, isConnected, isPending, rootFolderId, 
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={!!fieldState.error || undefined}>
-              <FieldLabel htmlFor="game-local-path">Local Save Folder</FieldLabel>
+              <FieldLabel htmlFor="game-local-path">{t('games:form.localPathLabel')}</FieldLabel>
               <FieldContent>
                 <div className="flex gap-2">
-                  <Input id="game-local-path" aria-invalid={!!fieldState.error || undefined} readOnly placeholder="Not selected" {...field} />
+                  <Input id="game-local-path" aria-invalid={!!fieldState.error || undefined} readOnly placeholder={t('games:form.localPathPlaceholder')} {...field} />
                   <Button type="button" variant="outline" onClick={() => handleBrowseLocal(field.onChange)}>
-                    Browse
+                    {t('actions.browse')}
                   </Button>
                 </div>
                 {fieldState.error && <FieldError>{fieldState.error.message}</FieldError>}
@@ -84,10 +86,10 @@ export function GameForm({ defaultValues, isConnected, isPending, rootFolderId, 
           control={control}
           render={({ field }) => (
             <Field>
-              <FieldLabel htmlFor="game-drive-path">Drive Subfolder</FieldLabel>
+              <FieldLabel htmlFor="game-drive-path">{t('games:form.driveSubfolderLabel')}</FieldLabel>
               <FieldContent>
                 <div className="flex gap-2">
-                  <Input id="game-drive-path" readOnly value={field.value ?? ''} placeholder="Not selected" />
+                  <Input id="game-drive-path" readOnly value={field.value ?? ''} placeholder={t('games:form.localPathPlaceholder')} />
                   {isConnected ? (
                     <Button
                       type="button"
@@ -106,17 +108,17 @@ export function GameForm({ defaultValues, isConnected, isPending, rootFolderId, 
                       }
                     >
                       <FolderIcon data-icon="inline-start" />
-                      Choose
+                      {t('actions.choose')}
                     </Button>
                   ) : (
                     <Tooltip>
                       <TooltipTrigger render={<span tabIndex={0} />}>
                         <Button type="button" variant="outline" disabled className="pointer-events-none">
                           <FolderIcon data-icon="inline-start" />
-                          Choose
+                          {t('actions.choose')}
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent>Connect Google Drive first</TooltipContent>
+                      <TooltipContent>{t('games:form.connectDriveFirst')}</TooltipContent>
                     </Tooltip>
                   )}
                 </div>
@@ -128,10 +130,10 @@ export function GameForm({ defaultValues, isConnected, isPending, rootFolderId, 
 
       <DialogFooter>
         <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
+          {t('actions.cancel')}
         </Button>
         <Button type="submit" disabled={isSubmitting || isPending}>
-          Save
+          {t('actions.save')}
         </Button>
       </DialogFooter>
     </form>

@@ -1,0 +1,48 @@
+{
+  "empty": {
+    "title": "No games yet",
+    "description": "Add a game to start managing its save backups."
+  },
+  "card": {
+    "statusBackedUp": "Backed up",
+    "statusFailed": "Backup failed",
+    "statusNever": "Never backed up",
+    "local": "Local: {{path}}",
+    "drive": "Drive: {{path}}",
+    "driveNotSet": "Not set",
+    "phaseBackingUpCurrent": "Backing up current save",
+    "phaseRestoring": "Restoring",
+    "phaseBackingUp": "Backing up",
+    "progressSummary": "{{filesDone}}/{{filesTotal}} files, {{bytesDone}}/{{bytesTotal}}",
+    "noBackupsYet": "No backups yet",
+    "backedUpToast": "{{name}} backed up",
+    "backupFailedToast": "Backup failed",
+    "restoredToast": "{{name}} restored",
+    "restoreFailedToast": "Restore failed",
+    "removedToast": "{{name}} removed",
+    "removeFailedToast": "Failed to remove game"
+  },
+  "form": {
+    "nameLabel": "Name",
+    "namePlaceholder": "Cyberpunk 2077",
+    "nameRequired": "Name is required.",
+    "localPathLabel": "Local Save Folder",
+    "localPathRequired": "Choose the local save folder.",
+    "localPathPlaceholder": "Not selected",
+    "driveSubfolderLabel": "Drive Subfolder",
+    "connectDriveFirst": "Connect Google Drive first",
+    "addedToast": "{{name}} added",
+    "updatedToast": "{{name}} updated",
+    "addFailedToast": "Failed to add game",
+    "updateFailedToast": "Failed to update game"
+  },
+  "import": {
+    "title": "Import games from Drive",
+    "description": "Games backed up from another device show up here. Pick a local save folder to link each one on this device.",
+    "connectFirst": "Connect Google Drive first.",
+    "emptyTitle": "Nothing to import",
+    "emptyDescription": "Every backup folder in your Drive is already linked to a game here.",
+    "importedToast": "{{name}} imported",
+    "importFailedToast": "Failed to import game"
+  }
+}

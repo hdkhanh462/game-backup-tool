@@ -1,0 +1,17 @@
+{
+  "history": {
+    "title": "Backup history — {{name}}",
+    "empty": "No backups yet.",
+    "summary": "{{device}} · {{fileCount}} files · {{size}}",
+    "deleteConfirm": "Permanently delete backup version \"{{name}}\"? This cannot be undone.",
+    "deletedToast": "Version {{name}} deleted",
+    "deleteFailedToast": "Failed to delete version"
+  },
+  "restoreConfirm": {
+    "title": "Restore {{name}}?",
+    "description": "This will overwrite the save files in \"{{path}}\" with the version from {{date}}. Local files that are not part of this backup will be removed. This cannot be undone.",
+    "safetyBackupLabel": "Back up current save before restoring",
+    "restoredToast": "{{name}} restored to {{version}}",
+    "restoreFailedToast": "Restore failed"
+  }
+}

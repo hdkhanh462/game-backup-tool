@@ -1,0 +1,15 @@
+{
+  "title": "Settings",
+  "backup": {
+    "sectionTitle": "Backup",
+    "incremental": "Incremental backups"
+  },
+  "restore": {
+    "sectionTitle": "Restore",
+    "confirmOverwrite": "Confirm before overwriting saves",
+    "safetyBackupDefault": "Back up current save before restoring"
+  },
+  "general": {
+    "sectionTitle": "General"
+  }
+}

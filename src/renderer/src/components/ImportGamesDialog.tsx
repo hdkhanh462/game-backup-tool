@@ -12,8 +12,10 @@ import { useDialogStore } from '@renderer/store/useDialogStore';
 import { useQuery } from '@tanstack/react-query';
 import { CloudDownloadIcon, FolderIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export function ImportGamesDialog(): React.JSX.Element {
+  const { t } = useTranslation(['common', 'games']);
   const { open } = useDialogStore((state) => state.importGamesDialog);
   const closeImportGamesDialog = useDialogStore((state) => state.closeImportGamesDialog);
   const { status } = useAuthStatus();
@@ -44,10 +46,10 @@ export function ImportGamesDialog(): React.JSX.Element {
       { name: candidate.name, localPath, driveFolderId: candidate.id, driveFolderPath: candidate.path },
       {
         onSuccess: () => {
-          toast.add({ title: `${candidate.name} imported`, type: 'success' });
+          toast.add({ title: t('games:import.importedToast', { name: candidate.name }), type: 'success' });
         },
         onError: (error) => {
-          toast.add({ title: 'Failed to import game', description: String(error), type: 'error' });
+          toast.add({ title: t('games:import.importFailedToast'), description: String(error), type: 'error' });
         },
         onSettled: () => setImportingId(null),
       },
@@ -58,12 +60,12 @@ export function ImportGamesDialog(): React.JSX.Element {
     <Dialog open={open} onOpenChange={(next) => !next && closeImportGamesDialog()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Import games from Drive</DialogTitle>
-          <DialogDescription>Games backed up from another device show up here. Pick a local save folder to link each one on this device.</DialogDescription>
+          <DialogTitle>{t('games:import.title')}</DialogTitle>
+          <DialogDescription>{t('games:import.description')}</DialogDescription>
         </DialogHeader>
 
         {status.state !== 'connected' ? (
-          <p className="py-8 text-center text-sm text-muted-foreground">Connect Google Drive first.</p>
+          <p className="py-8 text-center text-sm text-muted-foreground">{t('games:import.connectFirst')}</p>
         ) : isLoading ? (
           <div className="flex items-center justify-center py-8">
             <Spinner />
@@ -73,8 +75,8 @@ export function ImportGamesDialog(): React.JSX.Element {
             <EmptyMedia variant="icon">
               <CloudDownloadIcon />
             </EmptyMedia>
-            <EmptyTitle>Nothing to import</EmptyTitle>
-            <EmptyDescription>Every backup folder in your Drive is already linked to a game here.</EmptyDescription>
+            <EmptyTitle>{t('games:import.emptyTitle')}</EmptyTitle>
+            <EmptyDescription>{t('games:import.emptyDescription')}</EmptyDescription>
           </Empty>
         ) : (
           <div className="flex max-h-80 flex-col gap-2 overflow-y-auto">
@@ -85,13 +87,13 @@ export function ImportGamesDialog(): React.JSX.Element {
                   <p className="truncate text-xs text-muted-foreground">{candidate.path}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Input readOnly value={localPaths[candidate.id] ?? ''} placeholder="Not selected" className="min-w-0 flex-1" />
+                  <Input readOnly value={localPaths[candidate.id] ?? ''} placeholder={t('games:form.localPathPlaceholder')} className="min-w-0 flex-1" />
                   <Button type="button" variant="outline" size="sm" onClick={() => handleBrowse(candidate.id)}>
                     <FolderIcon data-icon="inline-start" />
-                    Browse
+                    {t('actions.browse')}
                   </Button>
                   <Button type="button" size="sm" disabled={!localPaths[candidate.id] || (isImporting && importingId === candidate.id)} onClick={() => handleImport(candidate)}>
-                    Import
+                    {t('actions.import')}
                   </Button>
                 </div>
               </div>

@@ -5,8 +5,10 @@ import { useAuthStatus } from '@renderer/features/auth/hooks/useAuthStatus';
 import { useGames } from '@renderer/features/games/hooks/useGames';
 import type { GameFormValues } from '@renderer/features/games/types';
 import { useDialogStore } from '@renderer/store/useDialogStore';
+import { useTranslation } from 'react-i18next';
 
 export function AddEditGameDialog(): React.JSX.Element {
+  const { t } = useTranslation(['common', 'games']);
   const { open, game } = useDialogStore((state) => state.gameDialog);
   const closeGameDialog = useDialogStore((state) => state.closeGameDialog);
   const { status } = useAuthStatus();
@@ -14,11 +16,11 @@ export function AddEditGameDialog(): React.JSX.Element {
 
   const handleSubmit = (values: GameFormValues): void => {
     const onSuccess = (): void => {
-      toast.add({ title: `${values.name} ${game ? 'updated' : 'added'}`, type: 'success' });
+      toast.add({ title: t(game ? 'games:form.updatedToast' : 'games:form.addedToast', { name: values.name }), type: 'success' });
       closeGameDialog();
     };
     const onError = (error: Error): void => {
-      toast.add({ title: game ? 'Failed to update game' : 'Failed to add game', description: String(error), type: 'error' });
+      toast.add({ title: t(game ? 'games:form.updateFailedToast' : 'games:form.addFailedToast'), description: String(error), type: 'error' });
     };
 
     if (game) {
@@ -32,7 +34,7 @@ export function AddEditGameDialog(): React.JSX.Element {
     <Dialog open={open} onOpenChange={(next) => !next && closeGameDialog()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{game ? 'Edit Game' : 'Add Game'}</DialogTitle>
+          <DialogTitle>{game ? t('actions.editGame') : t('actions.addGame')}</DialogTitle>
         </DialogHeader>
 
         {open && (

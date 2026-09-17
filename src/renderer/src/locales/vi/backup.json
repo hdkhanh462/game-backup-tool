@@ -1,0 +1,17 @@
+{
+  "history": {
+    "title": "Lịch sử sao lưu — {{name}}",
+    "empty": "Chưa có bản sao lưu nào.",
+    "summary": "{{device}} · {{fileCount}} tệp · {{size}}",
+    "deleteConfirm": "Xóa vĩnh viễn bản sao lưu \"{{name}}\"? Không thể hoàn tác.",
+    "deletedToast": "Đã xóa bản {{name}}",
+    "deleteFailedToast": "Xóa bản sao lưu thất bại"
+  },
+  "restoreConfirm": {
+    "title": "Khôi phục {{name}}?",
+    "description": "Thao tác này sẽ ghi đè các tệp save trong \"{{path}}\" bằng bản từ {{date}}. Các tệp cục bộ không thuộc bản sao lưu này sẽ bị xóa. Không thể hoàn tác.",
+    "safetyBackupLabel": "Sao lưu save hiện tại trước khi khôi phục",
+    "restoredToast": "Đã khôi phục {{name}} về bản {{version}}",
+    "restoreFailedToast": "Khôi phục thất bại"
+  }
+}

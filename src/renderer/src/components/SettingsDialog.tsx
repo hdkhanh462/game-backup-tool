@@ -7,11 +7,12 @@ import { useSettings } from '@renderer/features/settings/hooks/useSettings';
 import { useDialogStore } from '@renderer/store/useDialogStore';
 import type { AppSettings } from '@shared/types';
 import { Controller, useForm } from 'react-hook-form';
-
-const THEME_LABELS: Record<string, string> = { light: 'Light', dark: 'Dark', system: 'System' };
-const LANGUAGE_LABELS: Record<string, string> = { en: 'English' };
+import { useTranslation } from 'react-i18next';
 
 export function SettingsDialog(): React.JSX.Element {
+  const { t } = useTranslation(['common', 'settings']);
+  const THEME_LABELS: Record<string, string> = { light: t('theme.light'), dark: t('theme.dark'), system: t('theme.system') };
+  const LANGUAGE_LABELS: Record<string, string> = { en: t('language.en'), vi: t('language.vi') };
   const open = useDialogStore((state) => state.settingsDialog.open);
   const closeSettingsDialog = useDialogStore((state) => state.closeSettingsDialog);
   const { settings, updateSettings } = useSettings();
@@ -34,33 +35,33 @@ export function SettingsDialog(): React.JSX.Element {
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Settings</DialogTitle>
+          <DialogTitle>{t('settings:title')}</DialogTitle>
         </DialogHeader>
 
         <form className="contents" onSubmit={submit}>
           <FieldGroup>
-            <p className="text-sm font-medium">Backup</p>
+            <p className="text-sm font-medium">{t('settings:backup.sectionTitle')}</p>
             <Controller
               name="incrementalBackupEnabled"
               control={control}
               render={({ field }) => (
                 <Field orientation="horizontal">
                   <FieldContent>
-                    <FieldLabel htmlFor="incremental-backup">Incremental backups</FieldLabel>
+                    <FieldLabel htmlFor="incremental-backup">{t('settings:backup.incremental')}</FieldLabel>
                   </FieldContent>
                   <Switch id="incremental-backup" checked={field.value} onCheckedChange={field.onChange} />
                 </Field>
               )}
             />
 
-            <p className="text-sm font-medium">Restore</p>
+            <p className="text-sm font-medium">{t('settings:restore.sectionTitle')}</p>
             <Controller
               name="confirmBeforeOverwrite"
               control={control}
               render={({ field }) => (
                 <Field orientation="horizontal">
                   <FieldContent>
-                    <FieldLabel htmlFor="confirm-overwrite">Confirm before overwriting saves</FieldLabel>
+                    <FieldLabel htmlFor="confirm-overwrite">{t('settings:restore.confirmOverwrite')}</FieldLabel>
                   </FieldContent>
                   <Switch id="confirm-overwrite" checked={field.value} onCheckedChange={field.onChange} />
                 </Field>
@@ -72,29 +73,29 @@ export function SettingsDialog(): React.JSX.Element {
               render={({ field }) => (
                 <Field orientation="horizontal">
                   <FieldContent>
-                    <FieldLabel htmlFor="safety-backup-default">Back up current save before restoring</FieldLabel>
+                    <FieldLabel htmlFor="safety-backup-default">{t('settings:restore.safetyBackupDefault')}</FieldLabel>
                   </FieldContent>
                   <Switch id="safety-backup-default" checked={field.value} onCheckedChange={field.onChange} />
                 </Field>
               )}
             />
 
-            <p className="text-sm font-medium">General</p>
+            <p className="text-sm font-medium">{t('settings:general.sectionTitle')}</p>
             <Controller
               name="theme"
               control={control}
               render={({ field }) => (
                 <Field>
-                  <FieldLabel>Theme</FieldLabel>
+                  <FieldLabel>{t('theme.label')}</FieldLabel>
                   <FieldContent>
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger className="w-full">
                         <SelectValue>{(value: string) => THEME_LABELS[value] ?? value}</SelectValue>
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="light">Light</SelectItem>
-                        <SelectItem value="dark">Dark</SelectItem>
-                        <SelectItem value="system">System</SelectItem>
+                        <SelectItem value="light">{t('theme.light')}</SelectItem>
+                        <SelectItem value="dark">{t('theme.dark')}</SelectItem>
+                        <SelectItem value="system">{t('theme.system')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </FieldContent>
@@ -106,14 +107,15 @@ export function SettingsDialog(): React.JSX.Element {
               control={control}
               render={({ field }) => (
                 <Field>
-                  <FieldLabel>Language</FieldLabel>
+                  <FieldLabel>{t('language.label')}</FieldLabel>
                   <FieldContent>
                     <Select value={field.value ?? 'en'} onValueChange={field.onChange}>
                       <SelectTrigger className="w-full">
                         <SelectValue>{(value: string) => LANGUAGE_LABELS[value] ?? value}</SelectValue>
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="en">English</SelectItem>
+                        <SelectItem value="en">{t('language.en')}</SelectItem>
+                        <SelectItem value="vi">{t('language.vi')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </FieldContent>
@@ -131,9 +133,9 @@ export function SettingsDialog(): React.JSX.Element {
                 closeSettingsDialog();
               }}
             >
-              Cancel
+              {t('actions.cancel')}
             </Button>
-            <Button type="submit">Save</Button>
+            <Button type="submit">{t('actions.save')}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

@@ -1,0 +1,11 @@
+{
+  "picker": {
+    "title": "Choose a Drive folder",
+    "description": "Browse or create a folder in your Google Drive.",
+    "currentlySelected": "Currently selected: {{path}}",
+    "emptyFolder": "No folders here yet.",
+    "newFolderPlaceholder": "New folder name",
+    "createFailedToast": "Failed to create folder",
+    "folderSetToast": "Backup folder set to \"{{path}}\""
+  }
+}

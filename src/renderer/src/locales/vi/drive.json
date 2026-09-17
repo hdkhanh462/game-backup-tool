@@ -1,0 +1,11 @@
+{
+  "picker": {
+    "title": "Chọn thư mục Drive",
+    "description": "Duyệt hoặc tạo một thư mục trong Google Drive của bạn.",
+    "currentlySelected": "Đang chọn: {{path}}",
+    "emptyFolder": "Chưa có thư mục nào ở đây.",
+    "newFolderPlaceholder": "Tên thư mục mới",
+    "createFailedToast": "Tạo thư mục thất bại",
+    "folderSetToast": "Đã đặt thư mục sao lưu là \"{{path}}\""
+  }
+}
