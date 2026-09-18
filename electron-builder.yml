@@ -17,7 +17,6 @@ nsis:
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
-  publisherName: Hoàng Dương Khánh
 mac:
   target: dmg
 linux:
