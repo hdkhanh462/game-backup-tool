@@ -23,8 +23,8 @@ let currentState: AuthStatus = {
 };
 
 function getClientCredentials(): { clientId: string; clientSecret: string } | null {
-  const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID;
-  const clientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET;
+  const clientId = import.meta.env.MAIN_VITE_GOOGLE_OAUTH_CLIENT_ID;
+  const clientSecret = import.meta.env.MAIN_VITE_GOOGLE_OAUTH_CLIENT_SECRET;
   if (!clientId || !clientSecret) return null;
   return { clientId, clientSecret };
 }
@@ -32,7 +32,7 @@ function getClientCredentials(): { clientId: string; clientSecret: string } | nu
 function createClient(redirectUri?: string): OAuth2Client {
   const credentials = getClientCredentials();
   if (!credentials) {
-    throw new Error('Missing OAuth client credentials (GOOGLE_OAUTH_CLIENT_ID / GOOGLE_OAUTH_CLIENT_SECRET)');
+    throw new Error('Missing OAuth client credentials (MAIN_VITE_GOOGLE_OAUTH_CLIENT_ID / MAIN_VITE_GOOGLE_OAUTH_CLIENT_SECRET)');
   }
   return new OAuth2Client({
     clientId: credentials.clientId,
