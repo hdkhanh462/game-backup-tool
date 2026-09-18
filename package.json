@@ -15,9 +15,9 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "start": "electron-vite preview",
-    "build:win": "yarn build && electron-builder --win",
-    "build:mac": "yarn build && electron-builder --mac",
-    "build:linux": "yarn build && electron-builder --linux"
+    "build:win": "yarn build && electron-builder --win --publish never",
+    "build:mac": "yarn build && electron-builder --mac --publish never",
+    "build:linux": "yarn build && electron-builder --linux --publish never"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
