@@ -6,6 +6,7 @@ import type { AddressInfo } from 'net';
 
 import type { AuthStatus } from '../shared/types';
 import { clearRefreshToken, loadRefreshToken, saveRefreshToken } from './secureToken';
+import { get as getSettings } from './settings';
 import { getStore } from './store';
 
 const SCOPES = ['https://www.googleapis.com/auth/drive.file', 'https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile'];
@@ -140,8 +141,111 @@ export async function tryRestoreSession(): Promise<AuthStatus> {
   return currentState;
 }
 
+const CALLBACK_PAGE_TEXT = {
+  en: {
+    success: { title: 'Signed in successfully', description: 'You can close this window and return to the app.' },
+    error: { title: 'Sign-in failed', description: 'You can close this window and return to the app to try again.' },
+  },
+  vi: {
+    success: { title: 'Đăng nhập thành công', description: 'Bạn có thể đóng cửa sổ này và quay lại ứng dụng.' },
+    error: { title: 'Đăng nhập thất bại', description: 'Bạn có thể đóng cửa sổ này và quay lại ứng dụng để thử lại.' },
+  },
+} satisfies Record<string, { success: { title: string; description: string }; error: { title: string; description: string } }>;
+
+function renderCallbackPage(options: { success: boolean; language: string | null }): string {
+  const { success } = options;
+  const text = CALLBACK_PAGE_TEXT[options.language === 'vi' ? 'vi' : 'en'][success ? 'success' : 'error'];
+  const { title, description } = text;
+  const icon = success
+    ? '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+    : '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="color-scheme" content="light dark" />
+<title>${title}</title>
+<style>
+  :root {
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.145 0 0);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.145 0 0);
+    --primary: oklch(0.457 0.24 277.023);
+    --primary-foreground: oklch(0.962 0.018 272.314);
+    --destructive: oklch(0.577 0.245 27.325);
+    --destructive-foreground: oklch(0.985 0 0);
+    --muted-foreground: oklch(0.556 0 0);
+    --border: oklch(0.922 0 0);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: oklch(0.145 0 0);
+      --foreground: oklch(0.985 0 0);
+      --card: oklch(0.205 0 0);
+      --card-foreground: oklch(0.985 0 0);
+      --primary: oklch(0.398 0.195 277.366);
+      --primary-foreground: oklch(0.962 0.018 272.314);
+      --destructive: oklch(0.704 0.191 22.216);
+      --destructive-foreground: oklch(0.985 0 0);
+      --muted-foreground: oklch(0.708 0 0);
+      --border: oklch(1 0 0 / 10%);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--background);
+    color: var(--foreground);
+    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  }
+  .card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    text-align: center;
+    padding: 2.5rem 2rem;
+    width: min(26rem, calc(100vw - 2rem));
+    background: var(--card);
+    color: var(--card-foreground);
+    border: 1px solid var(--border);
+    border-radius: 0.875rem;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.08), 0 8px 24px rgb(0 0 0 / 0.06);
+  }
+  .icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 9999px;
+    background: ${success ? 'var(--primary)' : 'var(--destructive)'};
+    color: ${success ? 'var(--primary-foreground)' : 'var(--destructive-foreground)'};
+  }
+  h1 { font-size: 1.05rem; font-weight: 600; margin: 0; text-wrap: balance; }
+  p { font-size: 0.875rem; color: var(--muted-foreground); margin: 0; line-height: 1.5; text-wrap: balance; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">${icon}</div>
+    <h1>${title}</h1>
+    <p>${description}</p>
+  </div>
+</body>
+</html>`;
+}
+
 export async function connect(): Promise<AuthStatus> {
   currentState = { ...currentState, state: 'connecting' };
+  const { language } = await getSettings();
 
   try {
     const result = await new Promise<AuthStatus>((resolvePromise, rejectPromise) => {
@@ -159,7 +263,7 @@ export async function connect(): Promise<AuthStatus> {
         const errorParam = url.searchParams.get('error');
 
         res.writeHead(200, { 'Content-Type': 'text/html' });
-        res.end('<html><body>You can close this window and return to the app.</body></html>');
+        res.end(renderCallbackPage({ success: !(errorParam || !code), language }));
 
         clearTimeout(timeout);
         server.close();
