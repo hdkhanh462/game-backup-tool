@@ -7,6 +7,7 @@ import { GoogleAccountBar } from '@renderer/components/GoogleAccountBar';
 import { ImportGamesDialog } from '@renderer/components/ImportGamesDialog';
 import { RestoreConfirmDialog } from '@renderer/components/RestoreConfirmDialog';
 import { SettingsDialog } from '@renderer/components/SettingsDialog';
+import { ThemeLanguageMenu } from '@renderer/components/ThemeLanguageMenu';
 import { Button } from '@renderer/components/ui/button';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@renderer/components/ui/empty';
 import { useAuthStatus } from '@renderer/features/auth/hooks/useAuthStatus';
@@ -49,6 +50,7 @@ function App(): React.JSX.Element {
               {t('actions.importFromDrive')}
             </Button>
           )}
+          <ThemeLanguageMenu />
           <GoogleAccountBar />
         </div>
       </header>

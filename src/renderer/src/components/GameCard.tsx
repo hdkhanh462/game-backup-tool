@@ -5,6 +5,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Progress } from '@renderer/components/ui/progress';
 import { Spinner } from '@renderer/components/ui/spinner';
 import { toast } from '@renderer/components/ui/toast';
+import { useAuthStatus } from '@renderer/features/auth/hooks/useAuthStatus';
 import { backupApi } from '@renderer/features/backup/api';
 import { useBackup } from '@renderer/features/backup/hooks/useBackup';
 import { useGames } from '@renderer/features/games/hooks/useGames';
@@ -39,6 +40,8 @@ export function GameCard({ game }: GameCardProps): React.JSX.Element {
   const { t } = useTranslation(['common', 'games']);
   const { removeGame } = useGames();
   const { settings } = useSettings();
+  const { status } = useAuthStatus();
+  const isDriveConnected = status.state === 'connected';
   const openEditGameDialog = useDialogStore((state) => state.openEditGameDialog);
   const openBackupHistoryDialog = useDialogStore((state) => state.openBackupHistoryDialog);
   const openRestoreConfirmDialog = useDialogStore((state) => state.openRestoreConfirmDialog);
@@ -111,15 +114,15 @@ export function GameCard({ game }: GameCardProps): React.JSX.Element {
         </CardContent>
       )}
       <CardFooter className="flex flex-wrap gap-2">
-        <Button size="sm" disabled={isBusy} onClick={handleBackup}>
+        <Button size="sm" disabled={isBusy || !isDriveConnected} onClick={handleBackup}>
           <UploadIcon data-icon="inline-start" />
           {t('actions.backup')}
         </Button>
-        <Button size="sm" variant="outline" disabled={isBusy || isCheckingRestore} onClick={handleRestoreClick}>
+        <Button size="sm" variant="outline" disabled={isBusy || isCheckingRestore || !isDriveConnected} onClick={handleRestoreClick}>
           {isCheckingRestore ? <Spinner data-icon="inline-start" /> : <DownloadIcon data-icon="inline-start" />}
           {t('actions.restore')}
         </Button>
-        <Button size="sm" variant="outline" disabled={isBusy} onClick={() => openBackupHistoryDialog(game)}>
+        <Button size="sm" variant="outline" disabled={isBusy || !isDriveConnected} onClick={() => openBackupHistoryDialog(game)}>
           <HistoryIcon data-icon="inline-start" />
           {t('actions.history')}
         </Button>
