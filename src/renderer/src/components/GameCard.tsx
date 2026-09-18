@@ -1,6 +1,6 @@
 import { Badge } from '@renderer/components/ui/badge';
 import { Button } from '@renderer/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@renderer/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@renderer/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@renderer/components/ui/dropdown-menu';
 import { Progress } from '@renderer/components/ui/progress';
 import { Spinner } from '@renderer/components/ui/spinner';
@@ -16,7 +16,7 @@ import { formatBytes } from '@renderer/lib/format';
 import { useDialogStore } from '@renderer/store/useDialogStore';
 import type { Game } from '@shared/types';
 import type { TFunction } from 'i18next';
-import { DownloadIcon, FolderOpenIcon, HistoryIcon, MoreVerticalIcon, PencilIcon, TrashIcon, UploadIcon } from 'lucide-react';
+import { CloudIcon, DownloadIcon, FolderOpenIcon, HardDriveIcon, HistoryIcon, MoreVerticalIcon, PencilIcon, TrashIcon, UploadIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -96,11 +96,17 @@ export function GameCard({ game }: GameCardProps): React.JSX.Element {
     <Card>
       <CardHeader>
         <CardTitle>{game.name}</CardTitle>
-        {statusBadge(game, t)}
+        <CardDescription>{statusBadge(game, t)}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-1 text-sm text-muted-foreground">
-        <p className="truncate">{t('games:card.local', { path: game.localPath })}</p>
-        <p className="truncate">{t('games:card.drive', { path: game.driveFolderPath ?? t('games:card.driveNotSet') })}</p>
+        <p className="flex items-center gap-1.5 truncate" title={t('games:card.local', { path: game.localPath })}>
+          <HardDriveIcon className="size-3.5 shrink-0" />
+          <span className="truncate">{t('games:card.local', { path: game.localPath })}</span>
+        </p>
+        <p className="flex items-center gap-1.5 truncate" title={t('games:card.drive', { path: game.driveFolderPath ?? t('games:card.driveNotSet') })}>
+          <CloudIcon className="size-3.5 shrink-0" />
+          <span className="truncate">{t('games:card.drive', { path: game.driveFolderPath ?? t('games:card.driveNotSet') })}</span>
+        </p>
       </CardContent>
       {isBusy && operation && (
         <CardContent className="flex flex-col gap-1 pt-0">
