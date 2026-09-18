@@ -8,19 +8,7 @@ on:
 
 jobs:
   build:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: windows-latest
-            script: build:win
-          - os: macos-latest
-            script: build:mac
-          - os: ubuntu-latest
-            script: build:linux
-
-    runs-on: ${{ matrix.os }}
-
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -31,18 +19,15 @@ jobs:
 
       - run: yarn install --frozen-lockfile
 
-      - run: yarn ${{ matrix.script }}
+      - run: yarn build:win
         env:
           MAIN_VITE_GOOGLE_OAUTH_CLIENT_ID: ${{ vars.GOOGLE_OAUTH_CLIENT_ID }}
           MAIN_VITE_GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
 
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.os }}-installer
-          path: |
-            dist/*.exe
-            dist/*.dmg
-            dist/*.AppImage
+          name: windows-installer
+          path: dist/*.exe
           if-no-files-found: error
 
   release:
@@ -54,10 +39,11 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
+          name: windows-installer
           path: artifacts
 
       - uses: softprops/action-gh-release@v2
         with:
-          files: artifacts/*/*
+          files: artifacts/*
           draft: true
           generate_release_notes: true
