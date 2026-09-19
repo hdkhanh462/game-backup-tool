@@ -31,6 +31,6 @@ export interface RestoreOptions {
 }
 
 export interface BackupRunResult {
-  version: string;
+  version: BackupVersion;
   status: 'success' | 'failed';
 }

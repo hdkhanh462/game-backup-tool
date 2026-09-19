@@ -4,7 +4,7 @@ import { readdir, stat } from 'fs/promises';
 import { hostname } from 'os';
 import path from 'path';
 
-import type { BackupManifest, BackupManifestFileEntry, BackupVersion, Game, TransferProgress } from '../shared/types';
+import type { BackupManifest, BackupManifestFileEntry, BackupRunResult, BackupVersion, Game, TransferProgress } from '../shared/types';
 import * as drive from './drive';
 import * as games from './games';
 import * as settingsModule from './settings';
@@ -122,7 +122,7 @@ export async function deleteVersion(versionId: string): Promise<void> {
   await drive.deleteFile(versionId);
 }
 
-export async function runBackup(game: Game, onProgress: (progress: TransferProgress) => void): Promise<{ version: string; status: 'success' | 'failed' }> {
+export async function runBackup(game: Game, onProgress: (progress: TransferProgress) => void): Promise<BackupRunResult> {
   const gameId = game.id;
   if (!game.driveFolderId) throw new Error('This game has no Drive folder configured');
 
@@ -203,7 +203,10 @@ export async function runBackup(game: Game, onProgress: (progress: TransferProgr
 
     await games.recordBackupResult(gameId, { lastBackupAt: manifest.createdAt, lastBackupStatus: 'success' });
     emit({ phase: 'done', filesDone: filesTotal, filesTotal, bytesDone, bytesTotal });
-    return { version: versionName, status: 'success' };
+    return {
+      version: { id: versionFolder.id, name: versionName, createdAt: manifest.createdAt, device: manifest.device, totalBytes: manifest.totalBytes, fileCount: manifest.fileCount },
+      status: 'success' as const,
+    };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     emit({ phase: 'error', filesDone: 0, filesTotal: 0, bytesDone: 0, bytesTotal: 0, error: message });

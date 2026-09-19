@@ -10,7 +10,10 @@ import type { RestoreVersionInput } from './types';
 export const backupMutations = {
   run: (gameId: string): UseMutationOptions<BackupRunResult, Error, void> => ({
     mutationFn: () => backupApi.run(gameId),
-    meta: { invalidateQueriesMultiple: [gamesKeys.all, backupVersionsKeys.all(gameId)] },
+    onSuccess: (result) => {
+      queryClient.setQueryData<BackupVersion[]>(backupVersionsKeys.all(gameId), (prev) => [result.version, ...(prev ?? []).filter((v) => v.id !== result.version.id)]);
+    },
+    meta: { invalidateQueriesMultiple: [gamesKeys.all] },
   }),
 };
 
