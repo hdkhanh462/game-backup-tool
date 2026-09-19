@@ -7,4 +7,6 @@ export interface UseAuthStatusResult {
   connect: UseMutateFunction<AuthStatus, Error, void>;
   disconnect: UseMutateFunction<void, Error, void>;
   setRootFolder: UseMutateFunction<AuthStatus, Error, DriveFolderSelection>;
+  isDisconnecting: boolean;
+  isSettingRootFolder: boolean;
 }

@@ -37,4 +37,5 @@ export interface UseGamesResult {
   isAdding: boolean;
   isImporting: boolean;
   isUpdating: boolean;
+  isRemoving: boolean;
 }

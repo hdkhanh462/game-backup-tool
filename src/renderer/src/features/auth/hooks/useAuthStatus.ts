@@ -16,5 +16,7 @@ export function useAuthStatus(): UseAuthStatusResult {
     connect: connectMutation.mutate,
     disconnect: disconnectMutation.mutate,
     setRootFolder: setRootFolderMutation.mutate,
+    isDisconnecting: disconnectMutation.isPending,
+    isSettingRootFolder: setRootFolderMutation.isPending,
   };
 }
