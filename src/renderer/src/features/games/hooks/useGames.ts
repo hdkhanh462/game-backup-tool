@@ -21,5 +21,6 @@ export function useGames(): UseGamesResult {
     isAdding: addMutation.isPending,
     isImporting: importMutation.isPending,
     isUpdating: updateMutation.isPending,
+    isRemoving: removeMutation.isPending,
   };
 }

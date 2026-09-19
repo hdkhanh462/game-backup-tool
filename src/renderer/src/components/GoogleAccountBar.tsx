@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 
 export function GoogleAccountBar(): React.JSX.Element {
   const { t } = useTranslation(['common', 'drive']);
-  const { status, connect, disconnect, setRootFolder } = useAuthStatus();
+  const { status, connect, disconnect, setRootFolder, isDisconnecting, isSettingRootFolder } = useAuthStatus();
   const openDriveFolderPicker = useDialogStore((state) => state.openDriveFolderPicker);
   const openSettingsDialog = useDialogStore((state) => state.openSettingsDialog);
 
@@ -51,6 +51,7 @@ export function GoogleAccountBar(): React.JSX.Element {
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem
+          disabled={isSettingRootFolder}
           onClick={() =>
             openDriveFolderPicker({
               currentFolderId: status.rootFolderId ?? undefined,
@@ -63,7 +64,7 @@ export function GoogleAccountBar(): React.JSX.Element {
             })
           }
         >
-          <FolderIcon data-icon="inline-start" />
+          {isSettingRootFolder ? <Spinner data-icon="inline-start" /> : <FolderIcon data-icon="inline-start" />}
           {t('actions.changeBackupFolder')}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => openSettingsDialog()}>
@@ -71,8 +72,8 @@ export function GoogleAccountBar(): React.JSX.Element {
           {t('actions.settings')}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem variant="destructive" onClick={() => disconnect()}>
-          <LogOutIcon data-icon="inline-start" />
+        <DropdownMenuItem variant="destructive" disabled={isDisconnecting} onClick={() => disconnect()}>
+          {isDisconnecting ? <Spinner data-icon="inline-start" /> : <LogOutIcon data-icon="inline-start" />}
           {t('actions.signOut')}
         </DropdownMenuItem>
       </DropdownMenuContent>

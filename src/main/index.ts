@@ -6,6 +6,8 @@ import icon from '../../resources/icon.png?asset';
 import { tryRestoreSession } from './auth';
 import { registerIpcHandlers } from './ipc';
 
+app.commandLine.appendSwitch('disable-features', 'OverlayScrollbar');
+
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
     width: 1000,

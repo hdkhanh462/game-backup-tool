@@ -6,13 +6,14 @@ import { Progress } from '@renderer/components/ui/progress';
 import { Spinner } from '@renderer/components/ui/spinner';
 import { toast } from '@renderer/components/ui/toast';
 import { useAuthStatus } from '@renderer/features/auth/hooks/useAuthStatus';
-import { backupApi } from '@renderer/features/backup/api';
 import { useBackup } from '@renderer/features/backup/hooks/useBackup';
+import { backupVersionsQueries } from '@renderer/features/backup/queries';
 import { useGames } from '@renderer/features/games/hooks/useGames';
 import type { GameCardProps } from '@renderer/features/games/types';
 import { useSettings } from '@renderer/features/settings/hooks/useSettings';
 import { api } from '@renderer/lib/api';
 import { formatBytes } from '@renderer/lib/format';
+import { queryClient } from '@renderer/lib/queryClient';
 import { useDialogStore } from '@renderer/store/useDialogStore';
 import type { Game } from '@shared/types';
 import type { TFunction } from 'i18next';
@@ -38,7 +39,7 @@ function phaseLabel(operationType: 'backup' | 'restore', phase: string, t: TFunc
 
 export function GameCard({ game }: GameCardProps): React.JSX.Element {
   const { t } = useTranslation(['common', 'games']);
-  const { removeGame } = useGames();
+  const { removeGame, isRemoving } = useGames();
   const { settings } = useSettings();
   const { status } = useAuthStatus();
   const isDriveConnected = status.state === 'connected';
@@ -58,7 +59,7 @@ export function GameCard({ game }: GameCardProps): React.JSX.Element {
   const handleRestoreClick = async (): Promise<void> => {
     setIsCheckingRestore(true);
     try {
-      const versions = await backupApi.listVersions(game.id);
+      const versions = await queryClient.ensureQueryData(backupVersionsQueries.byGame(game.id, true));
       if (versions.length === 0) {
         toast.add({ title: t('games:card.noBackupsYet'), type: 'info' });
         return;
@@ -142,12 +143,12 @@ export function GameCard({ game }: GameCardProps): React.JSX.Element {
               <FolderOpenIcon data-icon="inline-start" />
               {t('actions.openSaveFolder')}
             </DropdownMenuItem>
-            <DropdownMenuItem disabled={isBusy} onClick={() => openEditGameDialog(game)}>
+            <DropdownMenuItem disabled={isBusy || isRemoving} onClick={() => openEditGameDialog(game)}>
               <PencilIcon data-icon="inline-start" />
               {t('actions.edit')}
             </DropdownMenuItem>
-            <DropdownMenuItem variant="destructive" disabled={isBusy} onClick={handleRemove}>
-              <TrashIcon data-icon="inline-start" />
+            <DropdownMenuItem variant="destructive" disabled={isBusy || isRemoving} onClick={handleRemove}>
+              {isRemoving ? <Spinner data-icon="inline-start" /> : <TrashIcon data-icon="inline-start" />}
               {t('actions.remove')}
             </DropdownMenuItem>
           </DropdownMenuContent>

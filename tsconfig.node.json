@@ -4,6 +4,7 @@
   "files": ["src/preload/index.d.ts"],
   "compilerOptions": {
     "composite": true,
+    "outDir": "out/tsc-node",
     "moduleResolution": "bundler",
     "types": ["electron-vite/node"]
   }

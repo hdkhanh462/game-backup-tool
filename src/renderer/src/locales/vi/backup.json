@@ -3,6 +3,7 @@
     "title": "Lịch sử sao lưu — {{name}}",
     "empty": "Chưa có bản sao lưu nào.",
     "summary": "{{device}} · {{fileCount}} tệp · {{size}}",
+    "deleteTitle": "Xóa bản sao lưu?",
     "deleteConfirm": "Xóa vĩnh viễn bản sao lưu \"{{name}}\"? Không thể hoàn tác.",
     "deletedToast": "Đã xóa bản {{name}}",
     "deleteFailedToast": "Xóa bản sao lưu thất bại"

@@ -3,6 +3,7 @@
     "title": "Backup history — {{name}}",
     "empty": "No backups yet.",
     "summary": "{{device}} · {{fileCount}} files · {{size}}",
+    "deleteTitle": "Delete backup version?",
     "deleteConfirm": "Permanently delete backup version \"{{name}}\"? This cannot be undone.",
     "deletedToast": "Version {{name}} deleted",
     "deleteFailedToast": "Failed to delete version"
