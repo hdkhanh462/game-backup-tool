@@ -12,7 +12,6 @@ export const backupVersionsQueries = {
       queryKey: backupVersionsKeys.all(gameId),
       queryFn: () => backupApi.listVersions(gameId),
       enabled,
-      staleTime: 0,
-      refetchOnMount: 'always',
+      staleTime: 15_000,
     }),
 };
