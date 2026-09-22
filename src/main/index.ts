@@ -8,6 +8,12 @@ import { registerIpcHandlers } from './ipc';
 
 app.commandLine.appendSwitch('disable-features', 'OverlayScrollbar');
 
+const RESTORE_SESSION_TIMEOUT_MS = 8000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T | undefined> {
+  return Promise.race([promise, new Promise<undefined>((resolve) => setTimeout(() => resolve(undefined), ms))]);
+}
+
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
     width: 1000,
@@ -37,7 +43,7 @@ function createWindow(): void {
   }
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   electronApp.setAppUserModelId('com.gamebackuptool');
 
   app.on('browser-window-created', (_, window) => {
@@ -45,7 +51,7 @@ app.whenReady().then(() => {
   });
 
   registerIpcHandlers();
-  void tryRestoreSession();
+  await withTimeout(tryRestoreSession(), RESTORE_SESSION_TIMEOUT_MS);
 
   createWindow();
 
