@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { shell } from 'electron';
+import { clipboard, shell } from 'electron';
 import { OAuth2Client } from 'google-auth-library';
 import http from 'http';
 import type { AddressInfo } from 'net';
@@ -12,8 +12,8 @@ import { getStore } from './store';
 const SCOPES = ['https://www.googleapis.com/auth/drive.file', 'https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile'];
 const CONNECT_TIMEOUT_MS = 2 * 60 * 1000;
 
-let client: OAuth2Client | null = null;
-let currentState: AuthStatus = {
+const CANCELLED_MESSAGE = 'Google sign-in cancelled';
+const DISCONNECTED_STATE: AuthStatus = {
   state: 'disconnected',
   email: null,
   name: null,
@@ -21,6 +21,11 @@ let currentState: AuthStatus = {
   rootFolderId: null,
   rootFolderPath: null,
 };
+
+let client: OAuth2Client | null = null;
+let currentState: AuthStatus = { ...DISCONNECTED_STATE };
+let cancelPending: (() => void) | null = null;
+let pendingAuthUrl: string | null = null;
 
 function getClientCredentials(): { clientId: string; clientSecret: string } | null {
   const clientId = import.meta.env.MAIN_VITE_GOOGLE_OAUTH_CLIENT_ID;
@@ -286,6 +291,14 @@ export async function connect(): Promise<AuthStatus> {
         rejectPromise(new Error('Google sign-in timed out'));
       }, CONNECT_TIMEOUT_MS);
 
+      cancelPending = () => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timeout);
+        server.close();
+        rejectPromise(new Error(CANCELLED_MESSAGE));
+      };
+
       let redirectUri = '';
       let pendingClient: OAuth2Client | null = null;
       server.listen(0, '127.0.0.1', () => {
@@ -297,6 +310,7 @@ export async function connect(): Promise<AuthStatus> {
           prompt: 'consent',
           scope: SCOPES,
         });
+        pendingAuthUrl = authUrl;
         shell.openExternal(authUrl);
       });
 
@@ -331,6 +345,10 @@ export async function connect(): Promise<AuthStatus> {
     currentState = result;
     return currentState;
   } catch (error) {
+    if (error instanceof Error && error.message === CANCELLED_MESSAGE) {
+      currentState = { ...DISCONNECTED_STATE };
+      return currentState;
+    }
     currentState = {
       state: 'error',
       email: null,
@@ -341,7 +359,20 @@ export async function connect(): Promise<AuthStatus> {
       error: error instanceof Error ? error.message : 'Failed to connect to Google',
     };
     return currentState;
+  } finally {
+    cancelPending = null;
+    pendingAuthUrl = null;
   }
+}
+
+export function cancelConnect(): void {
+  cancelPending?.();
+}
+
+export function copyAuthUrl(): boolean {
+  if (!pendingAuthUrl) return false;
+  clipboard.writeText(pendingAuthUrl);
+  return true;
 }
 
 export async function disconnect(): Promise<void> {

@@ -5,21 +5,35 @@ import { Spinner } from '@renderer/components/ui/spinner';
 import { toast } from '@renderer/components/ui/toast';
 import { useAuthStatus } from '@renderer/features/auth/hooks/useAuthStatus';
 import { useDialogStore } from '@renderer/store/useDialogStore';
-import { ChevronDownIcon, CloudIcon, FolderIcon, LogOutIcon, SettingsIcon } from 'lucide-react';
+import { ChevronDownIcon, CloudIcon, CopyIcon, FolderIcon, LogOutIcon, SettingsIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 export function GoogleAccountBar(): React.JSX.Element {
   const { t } = useTranslation(['common', 'drive']);
-  const { status, connect, disconnect, setRootFolder, isDisconnecting, isSettingRootFolder } = useAuthStatus();
+  const { status, connect, cancelConnect, copyAuthUrl, disconnect, setRootFolder, isDisconnecting, isSettingRootFolder } = useAuthStatus();
   const openDriveFolderPicker = useDialogStore((state) => state.openDriveFolderPicker);
   const openSettingsDialog = useDialogStore((state) => state.openSettingsDialog);
 
   if (status.state === 'connecting') {
     return (
-      <Button disabled variant="outline">
-        <Spinner data-icon="inline-start" />
-        {t('actions.connecting')}
-      </Button>
+      <div className="flex items-center gap-2">
+        <Button disabled variant="outline">
+          <Spinner data-icon="inline-start" />
+          {t('actions.connecting')}
+        </Button>
+        <Button
+          variant="outline"
+          onClick={async () => {
+            if (await copyAuthUrl()) toast.add({ title: t('actions.signInLinkCopied'), type: 'info' });
+          }}
+        >
+          <CopyIcon data-icon="inline-start" />
+          {t('actions.copySignInLink')}
+        </Button>
+        <Button variant="ghost" onClick={() => cancelConnect()}>
+          {t('actions.cancel')}
+        </Button>
+      </div>
     );
   }
 

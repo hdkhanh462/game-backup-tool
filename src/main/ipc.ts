@@ -12,6 +12,8 @@ import * as settings from './settings';
 export function registerIpcHandlers(): void {
   ipcMain.handle('auth:getStatus', () => auth.getStatus());
   ipcMain.handle('auth:connect', () => auth.connect());
+  ipcMain.handle('auth:cancelConnect', () => auth.cancelConnect());
+  ipcMain.handle('auth:copyAuthUrl', () => auth.copyAuthUrl());
   ipcMain.handle('auth:disconnect', () => auth.disconnect());
   ipcMain.handle('auth:setRootFolder', (_event, folder: { id: string; path: string }) => auth.setRootFolder(folder));
 

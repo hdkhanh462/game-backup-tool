@@ -23,6 +23,8 @@
     "changeBackupFolder": "Đổi thư mục sao lưu",
     "connectGoogleDrive": "Kết nối Google Drive",
     "connecting": "Đang kết nối…",
+    "copySignInLink": "Sao chép liên kết đăng nhập",
+    "signInLinkCopied": "Đã sao chép liên kết. Dán vào trình duyệt bất kỳ.",
     "selectThisFolder": "Chọn thư mục này",
     "moreActions": "Thao tác khác"
   },

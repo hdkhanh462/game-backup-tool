@@ -23,6 +23,8 @@
     "changeBackupFolder": "Change backup folder",
     "connectGoogleDrive": "Connect Google Drive",
     "connecting": "Connecting…",
+    "copySignInLink": "Copy sign-in link",
+    "signInLinkCopied": "Sign-in link copied. Paste it into any browser.",
     "selectThisFolder": "Select This Folder",
     "moreActions": "More actions"
   },
