@@ -5,7 +5,6 @@ import path from 'path';
 
 import { normalizeFilter } from '../shared/gameFilter';
 import type { Game, GameFilter, GameSyncConfig } from '../shared/types';
-import * as auth from './auth';
 import * as drive from './drive';
 
 const CONFIG_FILE_NAME = 'game-backup-config.json';
@@ -69,15 +68,19 @@ async function uploadConfigFile(rootId: string, config: RootConfig, previousFile
 // Serialises read-modify-write cycles so concurrent add/update/backup calls in this app can't overwrite each other.
 let writeQueue: Promise<void> = Promise.resolve();
 
-/** Best-effort: saves a game's portable settings into one shared config file in the backup root folder. Never throws. */
+/** Best-effort: saves a game's portable settings into one shared config file in the folder that contains the game's Drive folder. Never throws. */
 export function write(game: Pick<Game, 'name' | 'localPath' | 'filter' | 'driveFolderId'>): Promise<void> {
   const task = writeQueue.then(async () => {
-    const rootId = auth.getStatus().rootFolderId;
-    if (!rootId || !game.driveFolderId) {
-      await logSync(`skipped sync for ${game.name}: rootFolderId=${rootId} driveFolderId=${game.driveFolderId}`);
-      return;
-    }
+    if (!game.driveFolderId) return;
+    let rootId = 'unknown';
     try {
+      // The config lives next to the game folders (their parent), so it works without a configured root folder.
+      const parentId = await drive.getParentId(game.driveFolderId);
+      if (!parentId) {
+        await logSync(`skipped sync for ${game.name}: its Drive folder has no parent`);
+        return;
+      }
+      rootId = parentId;
       const { fileId, config } = await loadRootConfig(rootId);
       config.games[game.driveFolderId] = { name: game.name, localPath: game.localPath, filter: game.filter };
       await uploadConfigFile(rootId, config, fileId);

@@ -144,6 +144,11 @@ export async function deleteFile(fileId: string): Promise<void> {
   await driveClient.delete(`/files/${fileId}`);
 }
 
+export async function getParentId(fileId: string): Promise<string | null> {
+  const { data } = await driveClient.get<{ parents?: string[] }>(`/files/${fileId}`, { params: { fields: 'parents' } });
+  return data.parents?.[0] ?? null;
+}
+
 export async function getAbout(): Promise<{ usage: number; limit: number | null }> {
   const { data } = await driveClient.get<{ storageQuota: { usage: string; limit?: string } }>('/about', {
     params: { fields: 'storageQuota' },
