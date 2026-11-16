@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
 import { app } from 'electron';
-import { mkdir, rm, writeFile } from 'fs/promises';
+import { appendFile, mkdir, rm, writeFile } from 'fs/promises';
 import path from 'path';
 
 import { normalizeFilter } from '../shared/gameFilter';
@@ -9,6 +9,20 @@ import * as auth from './auth';
 import * as drive from './drive';
 
 const CONFIG_FILE_NAME = 'game-backup-config.json';
+
+/** Appends to <userData>/sync.log so sync problems are diagnosable in packaged builds, where there is no console. */
+async function logSync(message: string): Promise<void> {
+  try {
+    await appendFile(
+      path.join(app.getPath('userData'), 'sync.log'),
+      `${new Date().toISOString()} ${message}
+`,
+      'utf-8',
+    );
+  } catch {
+    // logging must never affect the app
+  }
+}
 
 function describeError(error: unknown): string {
   const response = (error as { response?: { status?: number; data?: unknown } }).response;
@@ -60,16 +74,17 @@ export function write(game: Pick<Game, 'name' | 'localPath' | 'filter' | 'driveF
   const task = writeQueue.then(async () => {
     const rootId = auth.getStatus().rootFolderId;
     if (!rootId || !game.driveFolderId) {
-      console.warn('[gameConfig] skipped sync: missing root folder or game Drive folder', { rootId, driveFolderId: game.driveFolderId });
+      await logSync(`skipped sync for ${game.name}: rootFolderId=${rootId} driveFolderId=${game.driveFolderId}`);
       return;
     }
     try {
       const { fileId, config } = await loadRootConfig(rootId);
       config.games[game.driveFolderId] = { name: game.name, localPath: game.localPath, filter: game.filter };
       await uploadConfigFile(rootId, config, fileId);
+      await logSync(`synced ${game.name} to root ${rootId} (${fileId ? 'replaced existing file' : 'created new file'}, ${Object.keys(config.games).length} games)`);
     } catch (error) {
       // syncing is a convenience; a failure must not break add/update/backup
-      console.error('[gameConfig] failed to sync game settings to Drive:', describeError(error));
+      await logSync(`FAILED to sync ${game.name} to root ${rootId}: ${describeError(error)}`);
     }
   });
   writeQueue = task;
@@ -89,7 +104,7 @@ export async function readAll(rootId: string): Promise<Map<string, SyncedGameSet
     }
   } catch (error) {
     // no config yet or unreadable: candidates just come back without a suggested path
-    console.error('[gameConfig] failed to read synced game settings from Drive:', describeError(error));
+    await logSync(`FAILED to read synced settings from root ${rootId}: ${describeError(error)}`);
   }
   return result;
 }
