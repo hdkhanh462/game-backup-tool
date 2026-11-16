@@ -205,7 +205,7 @@ export async function runBackup(game: Game, onProgress: (progress: TransferProgr
       mimeType: 'application/json',
     });
 
-    await gameConfig.write(game);
+    void gameConfig.write(game);
     await games.recordBackupResult(gameId, { lastBackupAt: manifest.createdAt, lastBackupStatus: 'success' });
     emit({ phase: 'done', filesDone: filesTotal, filesTotal, bytesDone, bytesTotal });
     return {

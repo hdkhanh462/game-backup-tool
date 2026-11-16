@@ -42,7 +42,7 @@ export async function add(input: GameInput): Promise<Game> {
   const games = store.get('games');
   games.push(game);
   store.set('games', games);
-  await gameConfig.write(game);
+  void gameConfig.write(game);
   return game;
 }
 
@@ -54,7 +54,7 @@ export async function update(id: string, patch: Partial<GameInput>): Promise<Gam
   const updated: Game = { ...games[index], ...patch, filter: normalizeFilter(patch.filter ?? games[index].filter), updatedAt: new Date().toISOString() };
   games[index] = updated;
   store.set('games', games);
-  await gameConfig.write(updated);
+  void gameConfig.write(updated);
   return updated;
 }
 

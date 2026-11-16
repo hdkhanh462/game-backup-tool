@@ -1,17 +1,23 @@
 import { app } from 'electron';
+import { existsSync } from 'fs';
 import os from 'os';
 import path from 'path';
 
 const isWindows = process.platform === 'win32';
 
 function builtinVariables(): Record<string, string> {
-  const vars: Record<string, string> = {
-    HOME: os.homedir(),
-    USERPROFILE: os.homedir(),
-    DOCUMENTS: app.getPath('documents'),
-    DESKTOP: app.getPath('desktop'),
-    APPDATA: app.getPath('appData'),
-  };
+  const vars: Record<string, string> = { HOME: os.homedir(), USERPROFILE: os.homedir() };
+  for (const [name, key] of [
+    ['DOCUMENTS', 'documents'],
+    ['DESKTOP', 'desktop'],
+    ['APPDATA', 'appData'],
+  ] as const) {
+    try {
+      vars[name] = app.getPath(key);
+    } catch {
+      // folder unavailable on this system; the placeholder simply won't resolve
+    }
+  }
   if (isWindows) {
     vars.LOCALAPPDATA = process.env.LOCALAPPDATA ?? path.join(os.homedir(), 'AppData', 'Local');
     vars.SAVEDGAMES = path.join(os.homedir(), 'Saved Games');
@@ -29,6 +35,10 @@ function lookup(name: string): string | undefined {
 
 /** Expands %VAR%, ${VAR}, $VAR and a leading ~ . Throws if a placeholder cannot be resolved. */
 export function expandPath(template: string): string {
+  // Backward compatibility: paths saved before placeholders existed are plain absolute paths. If the literal
+  // path is a real folder (even one containing '%' or '$'), it always wins over placeholder expansion.
+  if (/[%$~]/.test(template) && existsSync(template)) return path.normalize(template);
+
   const missing: string[] = [];
   const replace = (name: string): string => {
     const value = lookup(name);
@@ -41,10 +51,11 @@ export function expandPath(template: string): string {
 
   let result = template.trim();
   if (result === '~' || result.startsWith('~/') || result.startsWith('~\\')) result = os.homedir() + result.slice(1);
-  result = result
-    .replace(/%([^%\\/]+)%/g, (_m, name: string) => replace(name))
-    .replace(/\$\{([A-Za-z_][A-Za-z0-9_]*)\}/g, (_m, name: string) => replace(name))
-    .replace(/\$([A-Za-z_][A-Za-z0-9_]*)/g, (_m, name: string) => replace(name));
+  result = result.replace(/%([^%\\/]+)%/g, (_m, name: string) => replace(name));
+  // '$' is a legal filename character on Windows, so $VAR / ${VAR} are only expanded on other platforms.
+  if (!isWindows) {
+    result = result.replace(/\$\{([A-Za-z_][A-Za-z0-9_]*)\}/g, (_m, name: string) => replace(name)).replace(/\$([A-Za-z_][A-Za-z0-9_]*)/g, (_m, name: string) => replace(name));
+  }
 
   if (missing.length > 0) throw new Error(`Unknown path variable: ${[...new Set(missing)].map((n) => `%${n}%`).join(', ')}`);
   return path.normalize(result);
