@@ -1,9 +1,20 @@
+import { randomUUID } from 'crypto';
+import { app } from 'electron';
+import { mkdir, rm, writeFile } from 'fs/promises';
+import path from 'path';
+
 import { normalizeFilter } from '../shared/gameFilter';
 import type { Game, GameFilter, GameSyncConfig } from '../shared/types';
 import * as auth from './auth';
 import * as drive from './drive';
 
 const CONFIG_FILE_NAME = 'game-backup-config.json';
+
+function describeError(error: unknown): string {
+  const response = (error as { response?: { status?: number; data?: unknown } }).response;
+  if (response) return `HTTP ${response.status} ${JSON.stringify(response.data)}`;
+  return error instanceof Error ? error.message : String(error);
+}
 
 type GameEntry = Omit<GameSyncConfig, 'schemaVersion'>;
 
@@ -26,6 +37,21 @@ async function loadRootConfig(rootId: string): Promise<{ fileId: string | null; 
   return { fileId, config: { schemaVersion: 1, games: parsed.games ?? {} } };
 }
 
+/** Writes the config to a real local JSON file and uploads it (same path as save files), then removes the previous copy. */
+async function uploadConfigFile(rootId: string, config: RootConfig, previousFileId: string | null): Promise<void> {
+  const dir = path.join(app.getPath('temp'), 'gamesave-backup');
+  await mkdir(dir, { recursive: true });
+  const localFile = path.join(dir, `${randomUUID()}-${CONFIG_FILE_NAME}`);
+  try {
+    await writeFile(localFile, JSON.stringify(config, null, 2), 'utf-8');
+    await drive.uploadFile(localFile, { name: CONFIG_FILE_NAME, parents: [rootId] });
+  } finally {
+    await rm(localFile, { force: true }).catch(() => undefined);
+  }
+  // Delete the old copy only after the new one is uploaded, so a failed upload never loses the config.
+  if (previousFileId) await drive.deleteFile(previousFileId).catch(() => undefined);
+}
+
 // Serialises read-modify-write cycles so concurrent add/update/backup calls in this app can't overwrite each other.
 let writeQueue: Promise<void> = Promise.resolve();
 
@@ -33,15 +59,17 @@ let writeQueue: Promise<void> = Promise.resolve();
 export function write(game: Pick<Game, 'name' | 'localPath' | 'filter' | 'driveFolderId'>): Promise<void> {
   const task = writeQueue.then(async () => {
     const rootId = auth.getStatus().rootFolderId;
-    if (!rootId || !game.driveFolderId) return;
+    if (!rootId || !game.driveFolderId) {
+      console.warn('[gameConfig] skipped sync: missing root folder or game Drive folder', { rootId, driveFolderId: game.driveFolderId });
+      return;
+    }
     try {
       const { fileId, config } = await loadRootConfig(rootId);
       config.games[game.driveFolderId] = { name: game.name, localPath: game.localPath, filter: game.filter };
-      const buffer = Buffer.from(JSON.stringify(config, null, 2));
-      if (fileId) await drive.updateBuffer(fileId, buffer, 'application/json');
-      else await drive.uploadBuffer(buffer, { name: CONFIG_FILE_NAME, parents: [rootId], mimeType: 'application/json' });
-    } catch {
+      await uploadConfigFile(rootId, config, fileId);
+    } catch (error) {
       // syncing is a convenience; a failure must not break add/update/backup
+      console.error('[gameConfig] failed to sync game settings to Drive:', describeError(error));
     }
   });
   writeQueue = task;
@@ -59,8 +87,9 @@ export async function readAll(rootId: string): Promise<Map<string, SyncedGameSet
         filter: entry.filter ? normalizeFilter(entry.filter) : null,
       });
     }
-  } catch {
+  } catch (error) {
     // no config yet or unreadable: candidates just come back without a suggested path
+    console.error('[gameConfig] failed to read synced game settings from Drive:', describeError(error));
   }
   return result;
 }
