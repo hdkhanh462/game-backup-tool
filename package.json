@@ -1,6 +1,6 @@
 {
   "name": "game-backup-tool",
-  "version": "0.1.3",
+  "version": "0.1.4-beta",
   "description": "Manual game save backup & restore tool with Google Drive",
   "main": "./out/main/index.js",
   "author": "Hoàng Dương Khánh",
