@@ -1,4 +1,4 @@
-import { dialog, ipcMain, shell } from 'electron';
+import { app, dialog, ipcMain, shell } from 'electron';
 
 import type { AppSettings, GameInput, RestoreOptions } from '../shared/types';
 import * as auth from './auth';
@@ -71,6 +71,7 @@ export function registerIpcHandlers(): void {
     return result.filePaths[0];
   });
   ipcMain.handle('system:openPath', (_event, path: string) => shell.openPath(expandPath(path)));
+  ipcMain.handle('system:getVersion', () => app.getVersion());
   ipcMain.handle('system:collapsePath', (_event, absolutePath: string) => collapsePath(absolutePath));
   ipcMain.handle('system:expandPath', (_event, template: string) => {
     try {

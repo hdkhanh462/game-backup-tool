@@ -16,7 +16,9 @@ import { useOperationStore } from '@renderer/features/backup/operationStore';
 import { useGames } from '@renderer/features/games/hooks/useGames';
 import { useLocale } from '@renderer/features/settings/hooks/useLocale';
 import { useTheme } from '@renderer/features/settings/hooks/useTheme';
+import { api } from '@renderer/lib/api';
 import { useDialogStore } from '@renderer/store/useDialogStore';
+import { useQuery } from '@tanstack/react-query';
 import { CloudDownloadIcon, PlusIcon } from 'lucide-react';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -29,6 +31,7 @@ function App(): React.JSX.Element {
   const { status } = useAuthStatus();
   const openAddGameDialog = useDialogStore((state) => state.openAddGameDialog);
   const openImportGamesDialog = useDialogStore((state) => state.openImportGamesDialog);
+  const { data: appVersion } = useQuery({ queryKey: ['appVersion'], queryFn: () => api.system.getVersion(), staleTime: Infinity });
   const setOperation = useOperationStore((state) => state.setOperation);
 
   useEffect(() => {
@@ -43,7 +46,10 @@ function App(): React.JSX.Element {
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-20 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
-          <h1 className="text-xl font-semibold">{t('appTitle')}</h1>
+          <div className="flex items-baseline gap-2">
+            <h1 className="text-xl font-semibold">{t('appTitle')}</h1>
+            {appVersion && <span className="text-xs text-muted-foreground/70">v{appVersion}</span>}
+          </div>
           <div className="flex items-center gap-2">
             {status.state === 'connected' && (
               <Button variant="outline" onClick={() => openImportGamesDialog()}>
