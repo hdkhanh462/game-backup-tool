@@ -94,12 +94,11 @@ export async function listImportCandidates(): Promise<DriveGameCandidate[]> {
   const rootPath = status.rootFolderPath ?? 'My Drive';
   const { folders } = await drive.listFolders(status.rootFolderId);
   const unclaimed = folders.filter((folder) => !claimedIds.has(folder.id));
-  return Promise.all(
-    unclaimed.map(async (folder) => {
-      const config = await gameConfig.read(folder.id);
-      return { id: folder.id, name: folder.name, path: `${rootPath}/${folder.name}`, localPath: config.localPath, filter: config.filter };
-    }),
-  );
+  const synced = await gameConfig.readAll(status.rootFolderId);
+  return unclaimed.map((folder) => {
+    const settings = synced.get(folder.id);
+    return { id: folder.id, name: folder.name, path: `${rootPath}/${folder.name}`, localPath: settings?.localPath ?? null, filter: settings?.filter ?? null };
+  });
 }
 
 export async function recordBackupResult(id: string, result: { lastBackupAt: string | null; lastBackupStatus: Game['lastBackupStatus'] }): Promise<Game> {
