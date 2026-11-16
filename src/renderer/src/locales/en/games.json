@@ -34,7 +34,20 @@
     "addedToast": "{{name}} added",
     "updatedToast": "{{name}} updated",
     "addFailedToast": "Failed to add game",
-    "updateFailedToast": "Failed to update game"
+    "updateFailedToast": "Failed to update game",
+    "resolvedPath": "Resolves to: {{path}}",
+    "localPathHint": "Supports placeholders such as %USERPROFILE%, %APPDATA%, %LOCALAPPDATA%, %DOCUMENTS%, %SAVEDGAMES%. Saved to Drive so other devices can reuse it.",
+    "filterLabel": "File extension filter",
+    "filterMode": {
+      "none": "Back up all",
+      "blacklist": "Blacklist",
+      "whitelist": "Whitelist"
+    },
+    "filterHint": {
+      "blacklist": "Files with these extensions are skipped. Separate with commas, e.g. .log, .tmp",
+      "whitelist": "Only files with these extensions are backed up. Separate with commas, e.g. .sav, .dat"
+    },
+    "filterWhitelistRequired": "Enter at least one extension for the whitelist."
   },
   "import": {
     "title": "Import games from Drive",

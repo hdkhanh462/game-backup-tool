@@ -109,6 +109,16 @@ export async function uploadBuffer(buffer: Buffer, meta: { name: string; parents
   return data;
 }
 
+export async function updateBuffer(fileId: string, buffer: Buffer, mimeType = 'application/octet-stream'): Promise<DriveFile> {
+  const { data } = await uploadClient.patch<DriveFile>(`/files/${fileId}`, buffer, {
+    params: { uploadType: 'media' },
+    headers: { 'Content-Type': mimeType, 'Content-Length': buffer.length },
+    maxBodyLength: Infinity,
+    maxContentLength: Infinity,
+  });
+  return data;
+}
+
 export async function downloadFileStream(fileId: string): Promise<Readable> {
   const res = await driveClient.get<Readable>(`/files/${fileId}`, {
     params: { alt: 'media' },

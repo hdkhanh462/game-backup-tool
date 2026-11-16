@@ -40,45 +40,49 @@ function App(): React.JSX.Element {
   }, [setOperation]);
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-7xl flex-col gap-6 p-6">
-      <header className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">{t('appTitle')}</h1>
-        <div className="flex items-center gap-2">
-          {status.state === 'connected' && (
-            <Button variant="outline" onClick={() => openImportGamesDialog()}>
-              <CloudDownloadIcon data-icon="inline-start" />
-              {t('actions.importFromDrive')}
-            </Button>
-          )}
-          <ThemeLanguageMenu />
-          <GoogleAccountBar />
+    <div className="flex min-h-screen flex-col">
+      <header className="sticky top-0 z-20 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
+          <h1 className="text-xl font-semibold">{t('appTitle')}</h1>
+          <div className="flex items-center gap-2">
+            {status.state === 'connected' && (
+              <Button variant="outline" onClick={() => openImportGamesDialog()}>
+                <CloudDownloadIcon data-icon="inline-start" />
+                {t('actions.importFromDrive')}
+              </Button>
+            )}
+            <ThemeLanguageMenu />
+            <GoogleAccountBar />
+          </div>
         </div>
       </header>
 
-      {games.length === 0 && status.state !== 'connected' ? (
-        <Empty>
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <PlusIcon />
-            </EmptyMedia>
-            <EmptyTitle>{t('games:empty.title')}</EmptyTitle>
-            <EmptyDescription>{t('games:empty.description')}</EmptyDescription>
-          </EmptyHeader>
-          <EmptyContent>
-            <Button onClick={() => openAddGameDialog()}>
-              <PlusIcon data-icon="inline-start" />
-              {t('actions.addGame')}
-            </Button>
-          </EmptyContent>
-        </Empty>
-      ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          <AddGameCard onClick={() => openAddGameDialog()} />
-          {games.map((game) => (
-            <GameCard key={game.id} game={game} />
-          ))}
-        </div>
-      )}
+      <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 p-6">
+        {games.length === 0 && status.state !== 'connected' ? (
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <PlusIcon />
+              </EmptyMedia>
+              <EmptyTitle>{t('games:empty.title')}</EmptyTitle>
+              <EmptyDescription>{t('games:empty.description')}</EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <Button onClick={() => openAddGameDialog()}>
+                <PlusIcon data-icon="inline-start" />
+                {t('actions.addGame')}
+              </Button>
+            </EmptyContent>
+          </Empty>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <AddGameCard onClick={() => openAddGameDialog()} />
+            {games.map((game) => (
+              <GameCard key={game.id} game={game} />
+            ))}
+          </div>
+        )}
+      </main>
 
       <AddEditGameDialog />
       <DriveFolderPickerDialog />

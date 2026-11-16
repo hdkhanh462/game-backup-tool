@@ -1,4 +1,4 @@
-import type { Game, GameInput } from '@shared/types';
+import type { Game, GameFilter, GameInput } from '@shared/types';
 import type { UseMutateFunction } from '@tanstack/react-query';
 
 export interface GameCardProps {
@@ -10,6 +10,7 @@ export interface GameFormValues {
   localPath: string;
   driveFolderId: string | null;
   driveFolderPath: string | null;
+  filter: GameFilter;
 }
 
 export interface GameFormProps {

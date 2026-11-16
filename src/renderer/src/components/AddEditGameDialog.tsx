@@ -40,7 +40,7 @@ export function AddEditGameDialog(): React.JSX.Element {
         {open && (
           <GameForm
             key={game?.id ?? 'new'}
-            defaultValues={game ? { name: game.name, localPath: game.localPath, driveFolderId: game.driveFolderId, driveFolderPath: game.driveFolderPath } : undefined}
+            defaultValues={game ? { name: game.name, localPath: game.localPath, driveFolderId: game.driveFolderId, driveFolderPath: game.driveFolderPath, filter: game.filter } : undefined}
             isConnected={status.state === 'connected'}
             isPending={isAdding || isUpdating}
             rootFolderId={status.rootFolderId}

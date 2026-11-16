@@ -34,7 +34,20 @@
     "addedToast": "Đã thêm {{name}}",
     "updatedToast": "Đã cập nhật {{name}}",
     "addFailedToast": "Thêm game thất bại",
-    "updateFailedToast": "Cập nhật game thất bại"
+    "updateFailedToast": "Cập nhật game thất bại",
+    "resolvedPath": "Đường dẫn thực: {{path}}",
+    "localPathHint": "Hỗ trợ placeholder như %USERPROFILE%, %APPDATA%, %LOCALAPPDATA%, %DOCUMENTS%, %SAVEDGAMES%. Được lưu lên Drive để máy khác dùng lại.",
+    "filterLabel": "Lọc theo đuôi tệp",
+    "filterMode": {
+      "none": "Sao lưu tất cả",
+      "blacklist": "Blacklist",
+      "whitelist": "Whitelist"
+    },
+    "filterHint": {
+      "blacklist": "Bỏ qua các tệp có đuôi này. Ngăn cách bằng dấu phẩy, ví dụ .log, .tmp",
+      "whitelist": "Chỉ sao lưu các tệp có đuôi này. Ngăn cách bằng dấu phẩy, ví dụ .sav, .dat"
+    },
+    "filterWhitelistRequired": "Nhập ít nhất một đuôi tệp cho whitelist."
   },
   "import": {
     "title": "Nhập game từ Drive",

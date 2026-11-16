@@ -4,9 +4,11 @@ import path from 'path';
 import { PassThrough } from 'stream';
 import { pipeline } from 'stream/promises';
 
+import { isFileIncluded } from '../shared/gameFilter';
 import type { Game, RestoreOptions, TransferProgress } from '../shared/types';
 import { fetchVersionManifest, runBackup } from './backup';
 import * as drive from './drive';
+import { expandPath } from './pathTemplate';
 
 function toPosix(p: string): string {
   return p.split(path.sep).join('/');
@@ -32,6 +34,8 @@ export async function runRestore(game: Game, versionId: string, options: Restore
     onProgress({ ...partial, gameId: game.id, op: 'restore' });
   };
 
+  const rootDir = expandPath(game.localPath);
+
   emit({ phase: 'safetyBackup', filesDone: 0, filesTotal: 0, bytesDone: 0, bytesTotal: 0 });
 
   if (options.safetyBackup) {
@@ -48,7 +52,7 @@ export async function runRestore(game: Game, versionId: string, options: Restore
   let bytesDone = 0;
 
   for (const entry of manifest.files) {
-    const destPath = path.join(game.localPath, ...entry.path.split('/'));
+    const destPath = path.join(rootDir, ...entry.path.split('/'));
     await mkdir(path.dirname(destPath), { recursive: true });
 
     emit({ phase: 'downloading', currentFile: entry.path, filesDone, filesTotal, bytesDone, bytesTotal });
@@ -69,10 +73,10 @@ export async function runRestore(game: Game, versionId: string, options: Restore
   if (options.deleteExtraneous) {
     emit({ phase: 'cleanup', filesDone, filesTotal, bytesDone, bytesTotal });
     const manifestPaths = new Set(manifest.files.map((f) => f.path));
-    const localFiles = await walkRelative(game.localPath, game.localPath);
+    const localFiles = await walkRelative(rootDir, rootDir);
     for (const relativePath of localFiles) {
-      if (!manifestPaths.has(relativePath)) {
-        const absolutePath = path.join(game.localPath, ...relativePath.split('/'));
+      if (!manifestPaths.has(relativePath) && isFileIncluded(game.filter, relativePath)) {
+        const absolutePath = path.join(rootDir, ...relativePath.split('/'));
         await rm(absolutePath, { force: true });
       }
     }

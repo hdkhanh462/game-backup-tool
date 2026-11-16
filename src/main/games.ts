@@ -1,21 +1,27 @@
 import { randomUUID } from 'crypto';
 
+import { normalizeFilter } from '../shared/gameFilter';
 import type { DriveGameCandidate, Game, GameInput } from '../shared/types';
 import * as auth from './auth';
 import * as backup from './backup';
 import * as drive from './drive';
+import * as gameConfig from './gameConfig';
 import { getStore } from './store';
+
+function withFilter(game: Game): Game {
+  return { ...game, filter: normalizeFilter(game.filter) };
+}
 
 export async function list(): Promise<Game[]> {
   const store = await getStore();
-  return store.get('games');
+  return store.get('games').map(withFilter);
 }
 
 export async function get(id: string): Promise<Game> {
   const store = await getStore();
   const game = store.get('games').find((g) => g.id === id);
   if (!game) throw new Error(`Game not found: ${id}`);
-  return game;
+  return withFilter(game);
 }
 
 export async function add(input: GameInput): Promise<Game> {
@@ -27,6 +33,7 @@ export async function add(input: GameInput): Promise<Game> {
     localPath: input.localPath,
     driveFolderId: input.driveFolderId,
     driveFolderPath: input.driveFolderPath,
+    filter: normalizeFilter(input.filter),
     lastBackupAt: null,
     lastBackupStatus: 'never',
     createdAt: now,
@@ -35,6 +42,7 @@ export async function add(input: GameInput): Promise<Game> {
   const games = store.get('games');
   games.push(game);
   store.set('games', games);
+  await gameConfig.write(game);
   return game;
 }
 
@@ -43,9 +51,10 @@ export async function update(id: string, patch: Partial<GameInput>): Promise<Gam
   const games = store.get('games');
   const index = games.findIndex((g) => g.id === id);
   if (index === -1) throw new Error(`Game not found: ${id}`);
-  const updated: Game = { ...games[index], ...patch, updatedAt: new Date().toISOString() };
+  const updated: Game = { ...games[index], ...patch, filter: normalizeFilter(patch.filter ?? games[index].filter), updatedAt: new Date().toISOString() };
   games[index] = updated;
   store.set('games', games);
+  await gameConfig.write(updated);
   return updated;
 }
 
@@ -84,7 +93,13 @@ export async function listImportCandidates(): Promise<DriveGameCandidate[]> {
 
   const rootPath = status.rootFolderPath ?? 'My Drive';
   const { folders } = await drive.listFolders(status.rootFolderId);
-  return folders.filter((folder) => !claimedIds.has(folder.id)).map((folder) => ({ id: folder.id, name: folder.name, path: `${rootPath}/${folder.name}` }));
+  const unclaimed = folders.filter((folder) => !claimedIds.has(folder.id));
+  return Promise.all(
+    unclaimed.map(async (folder) => {
+      const config = await gameConfig.read(folder.id);
+      return { id: folder.id, name: folder.name, path: `${rootPath}/${folder.name}`, localPath: config.localPath, filter: config.filter };
+    }),
+  );
 }
 
 export async function recordBackupResult(id: string, result: { lastBackupAt: string | null; lastBackupStatus: Game['lastBackupStatus'] }): Promise<Game> {

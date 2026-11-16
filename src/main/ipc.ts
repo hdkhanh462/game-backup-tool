@@ -6,6 +6,7 @@ import * as backup from './backup';
 import * as drive from './drive';
 import * as games from './games';
 import { clearOperation, isBusy, listOperations, setOperation } from './operationTracker';
+import { collapsePath, expandPath } from './pathTemplate';
 import * as restore from './restore';
 import * as settings from './settings';
 
@@ -69,5 +70,13 @@ export function registerIpcHandlers(): void {
     if (result.canceled || result.filePaths.length === 0) return null;
     return result.filePaths[0];
   });
-  ipcMain.handle('system:openPath', (_event, path: string) => shell.openPath(path));
+  ipcMain.handle('system:openPath', (_event, path: string) => shell.openPath(expandPath(path)));
+  ipcMain.handle('system:collapsePath', (_event, absolutePath: string) => collapsePath(absolutePath));
+  ipcMain.handle('system:expandPath', (_event, template: string) => {
+    try {
+      return { ok: true as const, path: expandPath(template) };
+    } catch (error) {
+      return { ok: false as const, error: error instanceof Error ? error.message : String(error) };
+    }
+  });
 }

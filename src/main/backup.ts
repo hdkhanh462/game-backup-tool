@@ -4,9 +4,12 @@ import { readdir, stat } from 'fs/promises';
 import { hostname } from 'os';
 import path from 'path';
 
+import { isFileIncluded } from '../shared/gameFilter';
 import type { BackupManifest, BackupManifestFileEntry, BackupRunResult, BackupVersion, Game, TransferProgress } from '../shared/types';
 import * as drive from './drive';
+import * as gameConfig from './gameConfig';
 import * as games from './games';
+import { expandPath } from './pathTemplate';
 import * as settingsModule from './settings';
 
 interface ScannedFile {
@@ -132,7 +135,8 @@ export async function runBackup(game: Game, onProgress: (progress: TransferProgr
 
   try {
     emit({ phase: 'scanning', filesDone: 0, filesTotal: 0, bytesDone: 0, bytesTotal: 0 });
-    const absoluteFiles = await walk(game.localPath);
+    const rootDir = expandPath(game.localPath);
+    const absoluteFiles = (await walk(rootDir)).filter((f) => isFileIncluded(game.filter, f));
     const sizes = await Promise.all(absoluteFiles.map(async (f) => (await stat(f)).size));
     const bytesTotal = sizes.reduce((a, b) => a + b, 0);
     const filesTotal = absoluteFiles.length;
@@ -141,7 +145,7 @@ export async function runBackup(game: Game, onProgress: (progress: TransferProgr
     let hashedBytes = 0;
     for (let i = 0; i < absoluteFiles.length; i++) {
       const absolutePath = absoluteFiles[i];
-      const relativePath = toPosix(path.relative(game.localPath, absolutePath));
+      const relativePath = toPosix(path.relative(rootDir, absolutePath));
       const size = sizes[i];
       const sha256 = await hashFile(absolutePath, (chunkBytes) => {
         hashedBytes += chunkBytes;
@@ -201,6 +205,7 @@ export async function runBackup(game: Game, onProgress: (progress: TransferProgr
       mimeType: 'application/json',
     });
 
+    await gameConfig.write(game);
     await games.recordBackupResult(gameId, { lastBackupAt: manifest.createdAt, lastBackupStatus: 'success' });
     emit({ phase: 'done', filesDone: filesTotal, filesTotal, bytesDone, bytesTotal });
     return {
